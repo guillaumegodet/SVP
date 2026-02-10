@@ -172,38 +172,42 @@ export default function PersonnelDetail() {
 
                     <Box sx={{ p: 4 }}>
                         {activeTab === 0 && (
-                            <Grid container spacing={4}>
+                            <Grid container spacing={6}>
                                 <Grid item xs={12} md={6}>
-                                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Identité et contact</Typography>
-                                    <div className="space-y-4">
-                                        <TextField fullWidth label="Prénom" value={researcher.firstName} onChange={(e) => handleUpdateField('firstName', e.target.value)} />
-                                        <TextField fullWidth label="Nom" value={researcher.lastName} onChange={(e) => handleUpdateField('lastName', e.target.value)} />
-                                        <TextField fullWidth label="Email de contact" value={researcher.email} onChange={(e) => handleUpdateField('email', e.target.value)} />
-                                        <TextField fullWidth label="Email professionnel" value={researcher.professionalEmail} onChange={(e) => handleUpdateField('professionalEmail', e.target.value)} />
-                                        <TextField fullWidth label="Date de naissance" type="date" InputLabelProps={{ shrink: true }} value={researcher.birthDate} onChange={(e) => handleUpdateField('birthDate', e.target.value)} />
-                                    </div>
+                                    <Box sx={{ mb: 4 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Identité et contact</Typography>
+                                        <div className="space-y-4">
+                                            <TextField fullWidth label="Prénom" value={researcher.firstName} onChange={(e) => handleUpdateField('firstName', e.target.value)} />
+                                            <TextField fullWidth label="Nom" value={researcher.lastName} onChange={(e) => handleUpdateField('lastName', e.target.value)} />
+                                            <TextField fullWidth label="Email de contact" value={researcher.email} onChange={(e) => handleUpdateField('email', e.target.value)} />
+                                            <TextField fullWidth label="Email professionnel" value={researcher.professionalEmail} onChange={(e) => handleUpdateField('professionalEmail', e.target.value)} />
+                                            <TextField fullWidth label="Date de naissance" type="date" InputLabelProps={{ shrink: true }} value={researcher.birthDate} onChange={(e) => handleUpdateField('birthDate', e.target.value)} />
+                                        </div>
+                                    </Box>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Parcours et identifiants</Typography>
-                                    <div className="space-y-4">
-                                        <TextField fullWidth label="Grade / Corps" value={researcher.rank} onChange={(e) => handleUpdateField('rank', e.target.value)} />
-                                        <TextField fullWidth label="Employeur" value={researcher.employer} onChange={(e) => handleUpdateField('employer', e.target.value)} />
-                                        <TextField fullWidth label="Date d'arrivée dans la position" type="date" InputLabelProps={{ shrink: true }} value={researcher.arrivalDate} onChange={(e) => handleUpdateField('arrivalDate', e.target.value)} />
-                                        <TextField
-                                            fullWidth
-                                            label="ORCID"
-                                            value={researcher.orcid}
-                                            onChange={(e) => handleUpdateField('orcid', e.target.value)}
-                                            InputProps={{ endAdornment: <ExternalLink size={18} className="text-gray-400 cursor-pointer" /> }}
-                                        />
-                                        <TextField
-                                            fullWidth
-                                            label="IdRef"
-                                            value={researcher.idref}
-                                            onChange={(e) => handleUpdateField('idref', e.target.value)}
-                                            InputProps={{ endAdornment: <ExternalLink size={18} className="text-gray-400 cursor-pointer" /> }}
-                                        />
-                                    </div>
+                                    <Box sx={{ mb: 4 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Parcours et identifiants</Typography>
+                                        <div className="space-y-4">
+                                            <TextField fullWidth label="Grade / Corps" value={researcher.rank} onChange={(e) => handleUpdateField('rank', e.target.value)} />
+                                            <TextField fullWidth label="Employeur" value={researcher.employer} onChange={(e) => handleUpdateField('employer', e.target.value)} />
+                                            <TextField fullWidth label="Date d'arrivée dans la position" type="date" InputLabelProps={{ shrink: true }} value={researcher.arrivalDate} onChange={(e) => handleUpdateField('arrivalDate', e.target.value)} />
+                                            <TextField
+                                                fullWidth
+                                                label="ORCID"
+                                                value={researcher.orcid}
+                                                onChange={(e) => handleUpdateField('orcid', e.target.value)}
+                                                InputProps={{ endAdornment: <ExternalLink size={18} className="text-gray-400 cursor-pointer" /> }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="IdRef"
+                                                value={researcher.idref}
+                                                onChange={(e) => handleUpdateField('idref', e.target.value)}
+                                                InputProps={{ endAdornment: <ExternalLink size={18} className="text-gray-400 cursor-pointer" /> }}
+                                            />
+                                        </div>
+                                    </Box>
                                 </Grid>
                             </Grid>
                         )}
