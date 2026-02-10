@@ -1,0 +1,21 @@
+// Alternative version using HashRouter instead of BrowserRouter
+// Use this if BrowserRouter doesn't work on Figma Make deployment
+
+// In App.tsx, change line 2:
+import { HashRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+
+// In App.tsx, change line 1338:
+export default function App() {
+  return (
+    <HashRouter>
+      <AppContent />
+    </HashRouter>
+  );
+}
+
+// With HashRouter, URLs will be:
+// - Dashboard: https://relic-pants-21068819.figma.site/#/dashboard
+// - Publications: https://relic-pants-21068819.figma.site/#/publications
+// - Expertises: https://relic-pants-21068819.figma.site/#/expertises
+
+// The # (hash) allows the routing to work without server configuration
