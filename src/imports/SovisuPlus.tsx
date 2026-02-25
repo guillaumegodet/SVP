@@ -981,7 +981,7 @@ function Text10() {
   return (
     <div className="absolute h-[23px] left-0 top-[0.5px] w-0" data-name="Text">
       <p className="absolute font-['Roboto:Regular',sans-serif] font-normal leading-[23px] left-0 text-[16px] text-[rgba(0,0,0,0.54)] top-[-0.93px] tracking-[0.1501px] w-0" style={{ fontVariationSettings: "'wdth' 100" }}>
-        ​
+
       </p>
     </div>
   );
@@ -1022,7 +1022,7 @@ function Se() {
   return (
     <div className="h-[19.2px] relative shrink-0 w-full" data-name="se14">
       <p className="absolute font-['Roboto:Regular',sans-serif] font-normal leading-[11px] left-0 text-[16px] text-[rgba(0,0,0,0.87)] top-[4px] tracking-[0.1501px] w-0" style={{ fontVariationSettings: "'wdth' 100" }}>
-        ​
+
       </p>
     </div>
   );
@@ -2569,9 +2569,9 @@ function Container93() {
   );
 }
 
-export default function EnhanceSearchPerspective() {
+export default function SovisuPlus() {
   return (
-    <div className="bg-neutral-100 content-stretch flex items-start relative size-full" data-name="Enhance Search Perspective">
+    <div className="bg-neutral-100 content-stretch flex items-start relative size-full" data-name="Sovisu+">
       <Container8 />
       <Container93 />
     </div>

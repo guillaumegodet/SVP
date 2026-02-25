@@ -122,7 +122,7 @@ function AppContent() {
   // Mock user IdHAL - in real app, this would come from user profile/context
   // SCENARIO A (IdHAL manquant): userIdHal = ''
   // SCENARIO B (IdHAL présent): userIdHal = 'pierre-janin' (or any non-empty string)
-  const [userIdHal, setUserIdHal] = useState(''); // Toggle via UI button to test both scenarios
+  const [userIdHal, setUserIdHal] = useState('pierre-janin'); // Toggle via UI button to test both scenarios
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -283,13 +283,10 @@ function AppContent() {
                 justify="space-between"
                 sx={{ mb: 3, flexDirection: isMobile ? "column" : "row", gap: 2 }}
               >
-                <SvpBox flexDir="column">
+                <SvpBox align="center" sx={{ gap: 2 }}>
                   <SvpH1 sx={{ fontSize: isMobile ? "1.5rem" : "2rem" }}>
                     Publications
                   </SvpH1>
-                </SvpBox>
-                <SvpBox align="center" sx={{ gap: 1.5, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
-                  {/* Test button for IdHAL scenarios */}
                   <Tooltip
                     title={userIdHal ? "IdHAL: pierre-janin (Scénario B - Cliquez pour tester le Scénario A)" : "IdHAL manquant (Scénario A - Cliquez pour tester le Scénario B)"}
                     arrow
@@ -314,6 +311,8 @@ function AppContent() {
                       )}
                     </button>
                   </Tooltip>
+                </SvpBox>
+                <SvpBox align="center" sx={{ gap: 1.5, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
                   <SvpButton
                     variant="outlined"
                     startIcon={<svg style={{ width: 20, height: 20 }} fill="none" viewBox="0 0 20 20">
