@@ -407,8 +407,6 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
   }
 
 
-  const authorsList = publication.authors.split(', ');
-
   return (
     <Box sx={{
       bgcolor: '#F5F7F6',
