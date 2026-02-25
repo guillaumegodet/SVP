@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -24,22 +24,19 @@ import {
   Fade,
   ClickAwayListener,
 
-  // TextField,
-  // MenuItem,
-  // Select,
-  // FormControl,
-  // InputLabel,
-  // FormHelperText,
-  // LinearProgress,
-  // Divider,
-  // Alert,
-  // Autocomplete
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
 } from '@mui/material';
 import {
   ChevronLeft,
   Edit,
   Copy,
   X as CloseIcon,
+  Plus,
+  Trash2,
+  Save
 } from 'lucide-react';
 import {
   SvpH1,
@@ -54,9 +51,13 @@ import imgOpenAlex from "figma:asset/c3e845dcd7fbf8e813f65222ea98666fe44e1814.pn
 import imgScanR from "figma:asset/9435993bce15f5ee72b0f7570df0382bb3b4c8c8.png";
 import { HalDepositForm } from './HalDepositForm';
 import { HalUpdateForm } from './HalUpdateForm';
+import { AuthorAffiliationManager } from './AuthorAffiliationManager';
+
+type MultiLangField = { [lang: string]: string };
 
 type Publication = {
   title: string;
+  titles?: MultiLangField;
   authors: string;
   date: string;
   status: string;
@@ -65,6 +66,7 @@ type Publication = {
   journal?: string;
   type: string;
   abstract: string;
+  abstracts?: MultiLangField;
   doi?: string;
   hal?: string;
   sudocPpn?: string;
@@ -82,6 +84,7 @@ type Author = {
   laboratory: string;
   position: string;
   employer: string;
+  affiliation?: string;
   orcid?: string;
   hal?: string;
   idref?: string;
@@ -122,6 +125,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Prodig',
     position: 'Directeur de recherche',
     employer: 'IRD',
+    affiliation: 'Directeur de recherche IRD, UMR Prodig',
     orcid: 'https://orcid.org/0000-0002-1234-5678',
     hal: 'https://hal.science/search/index/?q=pierre-janin',
     idref: 'https://www.idref.fr/027253139',
@@ -134,6 +138,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Prodig',
     position: 'Doctorant',
     employer: 'IRD',
+    affiliation: 'Doctorant IRD, UMR Prodig',
     avatar: imgAvatar,
     hal: 'https://hal.science/search/index/?q=quentin-boudot',
     isInternal: true
@@ -145,6 +150,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Innovation',
     position: 'Chargée de recherche',
     employer: 'INRAE',
+    affiliation: 'Laboratoire Interdisciplinaire Sciences Innovations Sociétés (LISIS)',
     orcid: 'https://orcid.org/0000-0003-9876-5432',
     hal: 'https://hal.science/search/index/?q=estella-fourat',
     idref: 'https://www.idref.fr/123456789'
@@ -156,6 +162,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Eco&Sols',
     position: 'Directeur de recherche',
     employer: 'IRD',
+    affiliation: 'Directeur de recherche IRD, UMR Eco&Sols',
     hal: 'https://hal.science/search/index/?q=eric-blanchart'
   },
   'Miriam Carù': {
@@ -165,6 +172,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Innovation',
     position: 'Post-doctorante',
     employer: 'INRAE',
+    affiliation: 'Centre de recherche en histoire européenne comparée',
     orcid: 'https://orcid.org/0000-0001-5555-6666',
     hal: 'https://hal.science/search/index/?q=miriam-caru',
     idref: 'https://www.idref.fr/987654321'
@@ -176,6 +184,7 @@ const authorsDatabase: { [key: string]: Author } = {
     laboratory: 'UMR Prodig',
     position: 'Chercheur',
     employer: 'CNRS',
+    affiliation: 'Chercheur CNRS, UMR Prodig',
     hal: 'https://hal.science/search/index/?q=eric-nanzou',
     isInternal: true
   }
@@ -255,6 +264,43 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
     });
   }
 
+  // Multi-lang edition states
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingAbstract, setIsEditingAbstract] = useState(false);
+  const [editTitles, setEditTitles] = useState<MultiLangField>({});
+  const [editAbstracts, setEditAbstracts] = useState<MultiLangField>({});
+
+  const availableLanguages = [
+    { code: 'fr', label: 'Français' },
+    { code: 'en', label: 'Anglais' },
+    { code: 'es', label: 'Espagnol' },
+    { code: 'de', label: 'Allemand' },
+    { code: 'pt', label: 'Portugais' }
+  ];
+
+  // Auteurs synchronisés pour l'édition et le dépôt HAL
+  const [authors, setAuthors] = useState<any[]>([]);
+
+  // Initialisation des auteurs à partir de la publication
+  useEffect(() => {
+    if (publication?.authors && authors.length === 0) {
+      setAuthors(publication.authors.split(', ').map((name: string, idx: number) => ({
+        name,
+        function: idx === 0 ? 'auteur_correspondant' : 'auteur',
+        idhal: idx === 0 ? 'jean-dupont' : undefined,
+        orcid: idx === 0 ? '0000-0001-2345-6789' : undefined,
+        email: idx === 0 ? 'jean.dupont@example.com' : undefined,
+        affiliations: [{
+          halStructureId: '102312',
+          halStructureName: 'UMR LPED - Laboratoire Population Environnement Développement',
+          shortName: 'UMR LPED',
+          foundViaRor: true,
+          ror: '05q3vnk25'
+        }]
+      })));
+    }
+  }, [publication, authors.length]);
+
   // Function to copy text to clipboard
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -283,6 +329,74 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
     }
   };
 
+  // Multi-lang handlers
+  const handleEditTitle = () => {
+    setEditTitles(publication!.titles || { 'fr': publication!.title });
+    setIsEditingTitle(true);
+  };
+
+  const handleEditAbstract = () => {
+    setEditAbstracts(publication!.abstracts || { 'fr': publication!.abstract });
+    setIsEditingAbstract(true);
+  };
+
+  const handleSaveTitle = () => {
+    if (publication) {
+      // Update main title with 'fr' if exists, else first available
+      const langKeys = Object.keys(editTitles);
+      if (langKeys.length > 0) {
+        publication.title = editTitles['fr'] || editTitles[langKeys[0]];
+      }
+      publication.titles = editTitles;
+      setIsEditingTitle(false);
+      toast.success('Titres mis à jour');
+    }
+  };
+
+  const handleSaveAbstract = () => {
+    if (publication) {
+      const langKeys = Object.keys(editAbstracts);
+      if (langKeys.length > 0) {
+        publication.abstract = editAbstracts['fr'] || editAbstracts[langKeys[0]];
+      }
+      publication.abstracts = editAbstracts;
+      setIsEditingAbstract(false);
+      toast.success('Résumés mis à jour');
+    }
+  };
+
+  const handleAddTitleLanguage = (langCode: string) => {
+    if (!editTitles[langCode]) {
+      setEditTitles({ ...editTitles, [langCode]: '' });
+    }
+  };
+
+  const handleAddAbstractLanguage = (langCode: string) => {
+    if (!editAbstracts[langCode]) {
+      setEditAbstracts({ ...editAbstracts, [langCode]: '' });
+    }
+  };
+
+  const handleDeleteTitleLanguage = (langCode: string) => {
+    if (Object.keys(editTitles).length <= 1) {
+      toast.error('Au moins une langue est requise');
+      return;
+    }
+    const newTitles = { ...editTitles };
+    delete newTitles[langCode];
+    setEditTitles(newTitles);
+  };
+
+  const handleDeleteAbstractLanguage = (langCode: string) => {
+    if (Object.keys(editAbstracts).length <= 1) {
+      toast.error('Au moins une langue est requise');
+      return;
+    }
+    const newAbstracts = { ...editAbstracts };
+    delete newAbstracts[langCode];
+    setEditAbstracts(newAbstracts);
+  };
+
   if (!publication) {
     return (
       <Box sx={{ p: 3 }}>
@@ -294,7 +408,6 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
 
 
   const authorsList = publication.authors.split(', ');
-  const wordCount = publication.abstract.split(' ').length;
 
   return (
     <Box sx={{
@@ -370,41 +483,147 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
 
         {/* Content */}
         {activeTab === 0 && (
-          <Paper sx={{ p: 3, bgcolor: 'white' }}>
-            <SvpH2 sx={{ mb: 3, fontSize: '1.25rem' }}>
-              Informations bibliographiques
-            </SvpH2>
+          <Paper sx={{ p: 4, bgcolor: 'white', borderRadius: '12px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <SvpH2 sx={{ m: 0, fontSize: '0.9375rem' }}>
+                Informations bibliographiques
+              </SvpH2>
+            </Box>
 
-            <Table sx={{ '& .MuiTableCell-root': { border: 'none' } }}>
+            <Table sx={{ '& .MuiTableCell-root': { border: 'none', px: 0 } }}>
               <TableBody>
                 {/* Titre */}
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      color: '#6F7977',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      width: '200px',
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0
-                    }}
-                  >
+                  <TableCell sx={{ color: '#6F7977', fontSize: '0.875rem', fontWeight: 500, width: '200px', verticalAlign: 'top', pt: 2 }}>
                     Titre
                   </TableCell>
-                  <TableCell
-                    sx={{
-                      color: '#2D3836',
-                      fontSize: '0.9375rem',
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0,
-                      pl: 3
-                    }}
-                  >
-                    {publication.title}
+                  <TableCell sx={{ pt: 2, pl: 3 }}>
+                    {isEditingTitle ? (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(editTitles).map(([lang, value]) => (
+                          <Box key={lang} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                            <Chip
+                              label={lang.toUpperCase()}
+                              sx={{
+                                bgcolor: '#006A61',
+                                color: 'white',
+                                fontWeight: 600,
+                                width: '40px',
+                                mt: 1
+                              }}
+                            />
+                            <TextField
+                              fullWidth
+                              multiline
+                              value={value}
+                              onChange={(e) => setEditTitles({ ...editTitles, [lang]: e.target.value })}
+                              placeholder={`Titre en ${availableLanguages.find(l => l.code === lang)?.label.toLowerCase()}...`}
+                              variant="outlined"
+                              size="small"
+                              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                            />
+                            {Object.keys(editTitles).length > 1 && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteTitleLanguage(lang)}
+                                sx={{ color: '#DE3730', mt: 0.5 }}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <FormControl size="small" sx={{ minWidth: 160 }}>
+                            <Select
+                              value=""
+                              displayEmpty
+                              onChange={(e) => handleAddTitleLanguage(e.target.value as string)}
+                              renderValue={() => (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#006A61' }}>
+                                  <Plus size={18} />
+                                  <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Ajouter une langue</Typography>
+                                </Box>
+                              )}
+                              sx={{
+                                height: '36px',
+                                bgcolor: '#E8F5F4',
+                                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                '&:hover': { bgcolor: '#D1EBE9' }
+                              }}
+                            >
+                              {availableLanguages
+                                .filter(l => !editTitles[l.code])
+                                .map(l => (
+                                  <MenuItem key={l.code} value={l.code}>{l.label}</MenuItem>
+                                ))
+                              }
+                            </Select>
+                          </FormControl>
+                          <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                              onClick={() => setIsEditingTitle(false)}
+                              sx={{ color: '#6F7977', textTransform: 'none' }}
+                            >
+                              Annuler
+                            </Button>
+                            <Button
+                              startIcon={<Save size={18} />}
+                              onClick={handleSaveTitle}
+                              variant="contained"
+                              sx={{
+                                bgcolor: '#006A61',
+                                color: 'white',
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: '#005550' }
+                              }}
+                            >
+                              Enregistrer
+                            </Button>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ position: 'relative', '&:hover .edit-btn': { opacity: 1 } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          {Object.entries(publication.titles || { 'fr': publication.title }).map(([lang, value]) => (
+                            <Box key={lang} sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Chip
+                                label={lang.toUpperCase()}
+                                size="small"
+                                sx={{
+                                  bgcolor: '#F5F7F6',
+                                  color: '#6F7977',
+                                  fontWeight: 600,
+                                  border: '1px solid #E0E0E0',
+                                  width: '36px'
+                                }}
+                              />
+                              <Typography sx={{ color: '#2D3836', fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.4 }}>
+                                {value || '—'}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                        <IconButton
+                          className="edit-btn"
+                          onClick={handleEditTitle}
+                          sx={{
+                            position: 'absolute',
+                            top: -8,
+                            right: 0,
+                            opacity: 0,
+                            transition: 'opacity 0.2s',
+                            color: '#006A61',
+                            bgcolor: '#E8F5F4',
+                            '&:hover': { bgcolor: '#D1EBE9' }
+                          }}
+                        >
+                          <Edit size={18} />
+                        </IconButton>
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
 
@@ -653,14 +872,14 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
                     }}
                   >
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                      {authorsList.map((author, index) => {
-                        const authorData = authorsDatabase[author];
+                      {authors.map((author, index) => {
+                        const authorData = authorsDatabase[author.name];
                         const isInternal = authorData?.isInternal;
                         return (
                           <Chip
                             key={index}
-                            label={author}
-                            onClick={(e) => handleAuthorClick(author, e)}
+                            label={author.name}
+                            onClick={(e) => handleAuthorClick(author.name, e)}
                             sx={{
                               bgcolor: isInternal ? '#D4E9E7' : '#F3F4F6',
                               color: isInternal ? '#006A61' : '#6F7977',
@@ -675,6 +894,7 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
                       })}
                       <Button
                         startIcon={<Edit size={16} />}
+                        onClick={() => setActiveTab(4)}
                         sx={{
                           color: '#006A61',
                           textTransform: 'none',
@@ -694,176 +914,271 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
 
                 {/* Résumé */}
                 <TableRow>
-                  <TableCell
-                    sx={{
-                      color: '#6F7977',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      Résumé
-                      <Box
-                        sx={{
-                          bgcolor: '#006A61',
-                          color: 'white',
-                          borderRadius: '50%',
-                          width: '28px',
-                          height: '28px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '0.75rem',
-                          fontWeight: 600
-                        }}
-                      >
-                        {wordCount}
-                      </Box>
-                    </Box>
+                  <TableCell sx={{ color: '#6F7977', fontSize: '0.875rem', fontWeight: 500, verticalAlign: 'top', pt: 4 }}>
+                    Résumé
                   </TableCell>
-                  <TableCell
-                    sx={{
-                      color: '#2D3836',
-                      fontSize: '0.9375rem',
-                      lineHeight: 1.6,
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0,
-                      pl: 3
-                    }}
-                  >
-                    {publication.abstract}
+                  <TableCell sx={{ pt: 4, pl: 3 }}>
+                    {isEditingAbstract ? (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        {Object.entries(editAbstracts).map(([lang, value]) => (
+                          <Box key={lang} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                            <Chip
+                              label={lang.toUpperCase()}
+                              sx={{
+                                bgcolor: '#006A61',
+                                color: 'white',
+                                fontWeight: 600,
+                                width: '40px',
+                                mt: 1
+                              }}
+                            />
+                            <Box sx={{ flexGrow: 1 }}>
+                              <TextField
+                                fullWidth
+                                multiline
+                                rows={6}
+                                value={value}
+                                onChange={(e) => setEditAbstracts({ ...editAbstracts, [lang]: e.target.value })}
+                                placeholder={`Résumé en ${availableLanguages.find(l => l.code === lang)?.label.toLowerCase()}...`}
+                                variant="outlined"
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+                              />
+                            </Box>
+                            {Object.keys(editAbstracts).length > 1 && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDeleteAbstractLanguage(lang)}
+                                sx={{ color: '#DE3730', mt: 0.5 }}
+                              >
+                                <Trash2 size={18} />
+                              </IconButton>
+                            )}
+                          </Box>
+                        ))}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <FormControl size="small" sx={{ minWidth: 160 }}>
+                            <Select
+                              value=""
+                              displayEmpty
+                              onChange={(e) => handleAddAbstractLanguage(e.target.value as string)}
+                              renderValue={() => (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#006A61' }}>
+                                  <Plus size={18} />
+                                  <Typography sx={{ fontWeight: 600, fontSize: '0.875rem' }}>Ajouter une langue</Typography>
+                                </Box>
+                              )}
+                              sx={{
+                                height: '36px',
+                                bgcolor: '#E8F5F4',
+                                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                '&:hover': { bgcolor: '#D1EBE9' }
+                              }}
+                            >
+                              {availableLanguages
+                                .filter(l => !editAbstracts[l.code])
+                                .map(l => (
+                                  <MenuItem key={l.code} value={l.code}>{l.label}</MenuItem>
+                                ))
+                              }
+                            </Select>
+                          </FormControl>
+                          <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                              onClick={() => setIsEditingAbstract(false)}
+                              sx={{ color: '#6F7977', textTransform: 'none' }}
+                            >
+                              Annuler
+                            </Button>
+                            <Button
+                              startIcon={<Save size={18} />}
+                              onClick={handleSaveAbstract}
+                              variant="contained"
+                              sx={{
+                                bgcolor: '#006A61',
+                                color: 'white',
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: '#005550' }
+                              }}
+                            >
+                              Enregistrer
+                            </Button>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ position: 'relative', '&:hover .edit-btn-abs': { opacity: 1 } }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {Object.entries(publication.abstracts || { 'fr': publication.abstract }).map(([lang, value]) => (
+                            <Box key={lang}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Chip
+                                  label={lang.toUpperCase()}
+                                  size="small"
+                                  sx={{
+                                    bgcolor: '#F5F7F6',
+                                    color: '#6F7977',
+                                    fontWeight: 600,
+                                    border: '1px solid #E0E0E0',
+                                    width: '36px'
+                                  }}
+                                />
+                              </Box>
+                              <Typography sx={{ color: '#2D3836', fontSize: '0.9375rem', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                                {value || '—'}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                        <IconButton
+                          className="edit-btn-abs"
+                          onClick={handleEditAbstract}
+                          sx={{
+                            position: 'absolute',
+                            top: -8,
+                            right: 0,
+                            opacity: 0,
+                            transition: 'opacity 0.2s',
+                            color: '#006A61',
+                            bgcolor: '#E8F5F4',
+                            '&:hover': { bgcolor: '#D1EBE9' }
+                          }}
+                        >
+                          <Edit size={18} />
+                        </IconButton>
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
 
-                {/* Sources */}
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      color: '#6F7977',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0
-                    }}
-                  >
-                    Sources
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      verticalAlign: 'top',
-                      pt: 2,
-                      pb: 2,
-                      px: 0,
-                      pl: 3
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                      {publication.dataSources?.includes('HAL') && (
-                        <Chip
-                          icon={
-                            <Box
-                              component="img"
-                              src={imgHal}
-                              alt="HAL"
-                              sx={{ width: 16, height: 16 }}
-                            />
-                          }
-                          label="HAL"
-                          sx={{
-                            bgcolor: '#E8F5F4',
-                            color: '#006A61',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            height: '28px',
-                            '& .MuiChip-icon': {
-                              marginLeft: '8px'
-                            }
-                          }}
-                        />
-                      )}
-                      {publication.dataSources?.includes('OpenAlex') && (
-                        <Chip
-                          icon={
-                            <Box
-                              component="img"
-                              src={imgOpenAlex}
-                              alt="OpenAlex"
-                              sx={{ width: 16, height: 16 }}
-                            />
-                          }
-                          label="OpenAlex"
-                          sx={{
-                            bgcolor: '#FFF4E5',
-                            color: '#F57C00',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            height: '28px',
-                            '& .MuiChip-icon': {
-                              marginLeft: '8px'
-                            }
-                          }}
-                        />
-                      )}
-                      {publication.dataSources?.includes('Scopus') && (
-                        <Chip
-                          label="Scopus"
-                          sx={{
-                            bgcolor: '#FFF4E5',
-                            color: '#FF6C00',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            height: '28px'
-                          }}
-                        />
-                      )}
-                      {publication.dataSources?.includes('ScanR') && (
-                        <Chip
-                          icon={
-                            <Box
-                              component="img"
-                              src={imgScanR}
-                              alt="ScanR"
-                              sx={{ width: 16, height: 16 }}
-                            />
-                          }
-                          label="ScanR"
-                          sx={{
-                            bgcolor: '#F0F4FF',
-                            color: '#2196F3',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            height: '28px',
-                            '& .MuiChip-icon': {
-                              marginLeft: '8px'
-                            }
-                          }}
-                        />
-                      )}
-                      <Button
+                {!isEditingTitle && !isEditingAbstract && (
+                  <>
+
+                    {/* Sources */}
+                    <TableRow>
+                      <TableCell
                         sx={{
-                          color: '#006A61',
-                          textTransform: 'none',
+                          color: '#6F7977',
                           fontSize: '0.875rem',
                           fontWeight: 500,
-                          minHeight: '28px',
-                          '&:hover': {
-                            bgcolor: '#E8F5F4'
-                          }
+                          verticalAlign: 'top',
+                          pt: 2,
+                          pb: 2,
+                          px: 0
                         }}
                       >
-                        Comparer les sources
-                      </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
+                        Sources
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          verticalAlign: 'top',
+                          pt: 2,
+                          pb: 2,
+                          px: 0,
+                          pl: 3
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                          {publication.dataSources?.includes('HAL') && (
+                            <Chip
+                              icon={
+                                <Box
+                                  component="img"
+                                  src={imgHal}
+                                  alt="HAL"
+                                  sx={{ width: 16, height: 16 }}
+                                />
+                              }
+                              label="HAL"
+                              sx={{
+                                bgcolor: '#E8F5F4',
+                                color: '#006A61',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                height: '28px',
+                                '& .MuiChip-icon': {
+                                  marginLeft: '8px'
+                                }
+                              }}
+                            />
+                          )}
+                          {publication.dataSources?.includes('OpenAlex') && (
+                            <Chip
+                              icon={
+                                <Box
+                                  component="img"
+                                  src={imgOpenAlex}
+                                  alt="OpenAlex"
+                                  sx={{ width: 16, height: 16 }}
+                                />
+                              }
+                              label="OpenAlex"
+                              sx={{
+                                bgcolor: '#FFF4E5',
+                                color: '#F57C00',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                height: '28px',
+                                '& .MuiChip-icon': {
+                                  marginLeft: '8px'
+                                }
+                              }}
+                            />
+                          )}
+                          {publication.dataSources?.includes('Scopus') && (
+                            <Chip
+                              label="Scopus"
+                              sx={{
+                                bgcolor: '#FFF4E5',
+                                color: '#FF6C00',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                height: '28px'
+                              }}
+                            />
+                          )}
+                          {publication.dataSources?.includes('ScanR') && (
+                            <Chip
+                              icon={
+                                <Box
+                                  component="img"
+                                  src={imgScanR}
+                                  alt="ScanR"
+                                  sx={{ width: 16, height: 16 }}
+                                />
+                              }
+                              label="ScanR"
+                              sx={{
+                                bgcolor: '#F0F4FF',
+                                color: '#2196F3',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                height: '28px',
+                                '& .MuiChip-icon': {
+                                  marginLeft: '8px'
+                                }
+                              }}
+                            />
+                          )}
+                          <Button
+                            sx={{
+                              color: '#006A61',
+                              textTransform: 'none',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                              minHeight: '28px',
+                              '&:hover': {
+                                bgcolor: '#E8F5F4'
+                              }
+                            }}
+                          >
+                            Comparer les sources
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
               </TableBody>
             </Table>
           </Paper>
@@ -894,10 +1209,8 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
         )}
 
         {activeTab === 4 && (
-          <Paper sx={{ p: 3, bgcolor: 'white' }}>
-            <Typography sx={{ color: '#6F7977' }}>
-              Contenu des auteurs à venir...
-            </Typography>
+          <Paper sx={{ p: 4, bgcolor: 'white', borderRadius: '12px' }}>
+            <AuthorAffiliationManager authors={authors} onChange={setAuthors} />
           </Paper>
         )}
 
@@ -910,6 +1223,7 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
               initialAuthors={publication.authors}
               initialDocType={publication.type}
               initialDate={publication.date}
+              onTabChange={setActiveTab}
             />
           </Paper>
         )}
@@ -997,10 +1311,7 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
                           {selectedAuthor.firstName} {selectedAuthor.lastName}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#6F7977', textAlign: 'center', mb: 1 }}>
-                          {selectedAuthor.laboratory}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#6F7977', textAlign: 'center', fontSize: '0.75rem' }}>
-                          {selectedAuthor.position}, {selectedAuthor.employer}
+                          {selectedAuthor.affiliation || selectedAuthor.laboratory}
                         </Typography>
                       </Box>
 

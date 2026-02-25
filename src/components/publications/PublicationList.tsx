@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     Eye,
-    Upload,
     Search,
     X,
     ArrowUp,
@@ -62,8 +61,6 @@ interface PublicationListProps {
     handleHalStatusClick: (pub: Publication, event: React.MouseEvent<HTMLElement>) => void;
     handlePublicationClick: (pub: Publication) => void;
     setSelectedPublicationHistory: (history: HistoryEvent[] | null) => void;
-    setSelectedPublication: (pub: Publication | null) => void;
-    setShowHalDepositModal: (show: boolean) => void;
     searchType: 'chercheur' | 'laboratoire';
     openActionMenuIndex: number | null;
     setOpenActionMenuIndex: (index: number | null) => void;
@@ -90,8 +87,6 @@ export default function PublicationList({
     handleHalStatusClick,
     handlePublicationClick,
     setSelectedPublicationHistory,
-    setSelectedPublication,
-    setShowHalDepositModal,
     searchType,
     openActionMenuIndex,
     setOpenActionMenuIndex
@@ -99,7 +94,6 @@ export default function PublicationList({
     const { renderAuthors, renderJournal } = usePublicationRenderers({ handleAuthorClick, handleJournalClick });
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
     const activeFiltersCount = (statusFilter !== 'all' ? 1 : 0) + (typeFilter !== 'all' ? 1 : 0) + (searchTerm ? 1 : 0);
 
@@ -490,17 +484,7 @@ export default function PublicationList({
                                                                         </>
                                                                     )}
                                                                 </button>
-                                                                {(pub.status === 'Dans HAL' || pub.status === 'Hors HAL') && (
-                                                                    <button
-                                                                        onClick={() => { setOpenActionMenuIndex(null); setSelectedPublication(pub); setShowHalDepositModal(true); }}
-                                                                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.875rem', textAlign: 'left', color: SvpColors.textPrimary }}
-                                                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                                                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                                                    >
-                                                                        <Upload size={16} color={SvpColors.textSecondary} />
-                                                                        <span>Déposer sur HAL</span>
-                                                                    </button>
-                                                                )}
+
                                                             </SvpSurface>
                                                         </>
                                                     )}

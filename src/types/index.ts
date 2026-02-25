@@ -14,6 +14,7 @@ export type Author = {
     laboratory: string;
     position: string;
     employer: string;
+    affiliation?: string;
     orcid?: string;
     hal?: string;
     idref?: string;
@@ -30,8 +31,11 @@ export type Journal = {
     accessType: 'gold' | 'diamond' | 'hybrid' | 'bronze' | 'closed';
 };
 
+export type MultiLangField = { [lang: string]: string };
+
 export type Publication = {
     title: string;
+    titles?: MultiLangField;
     authors: string;
     date: string;
     status: string;
@@ -40,6 +44,7 @@ export type Publication = {
     journal?: string;
     type: string;
     abstract: string;
+    abstracts?: MultiLangField;
     doi?: string;
     hal?: string;
     sudocPpn?: string;

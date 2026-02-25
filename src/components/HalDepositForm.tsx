@@ -24,7 +24,6 @@ import {
   Mail
 } from 'lucide-react';
 import { PaperclipIcon } from './HalIcons';
-import { AuthorAffiliationManager } from './AuthorAffiliationManager';
 import { toast } from 'sonner';
 
 // Domaines HAL
@@ -74,6 +73,15 @@ const languages = [
   { value: 'pt', label: 'Portugais' }
 ];
 
+const authorFunctions = [
+  { value: 'auteur', label: 'Auteur' },
+  { value: 'auteur_correspondant', label: 'Auteur correspondant' },
+  { value: 'directeur_publication', label: 'Directeur de publication' },
+  { value: 'annotateur', label: 'Annotateur' },
+  { value: 'traducteur', label: 'Traducteur' },
+  { value: 'compilateur', label: 'Compilateur' }
+];
+
 
 
 
@@ -114,6 +122,7 @@ interface HalDepositFormProps {
   initialAuthors?: string;
   initialDocType?: string;
   initialDate?: string;
+  onTabChange?: (tabIndex: number) => void;
 }
 
 export function HalDepositForm({
@@ -121,14 +130,15 @@ export function HalDepositForm({
   initialAbstract = '',
   initialAuthors = '',
   initialDocType = '',
-  initialDate = ''
+  initialDate = '',
+  onTabChange
 }: HalDepositFormProps) {
   const [step, setStep] = useState<'form' | 'review' | 'uploading' | 'success' | 'error'>('form');
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // Form fields
-  const [title, setTitle] = useState(initialTitle);
-  const [abstract, setAbstract] = useState(initialAbstract);
+  const [title] = useState(initialTitle);
+  const [abstract] = useState(initialAbstract);
   const [documentType, setDocumentType] = useState(initialDocType);
   const [domains, setDomains] = useState<string[]>([]);
   const [language, setLanguage] = useState('fr');
@@ -136,7 +146,7 @@ export function HalDepositForm({
   const [license, setLicense] = useState('cc-by');
 
   // Authors management - simuler des données calculées via AureHAL
-  const [authors, setAuthors] = useState<Author[]>(
+  const [authors] = useState<Author[]>(
     initialAuthors ? initialAuthors.split(', ').map((name, idx) => ({
       name,
       function: idx === 0 ? 'auteur_correspondant' : 'auteur',
@@ -429,29 +439,97 @@ export function HalDepositForm({
         Remplissez les métadonnées obligatoires pour déposer votre publication sur HAL
       </Typography>
 
-      <Alert severity="warning" sx={{ mb: 3 }}>
-        Les champs marqués d'un astérisque (*) sont obligatoires pour éviter les rejets lors du dépôt.
+      <Alert severity="info" sx={{ mb: 4, borderRadius: '8px' }}>
+        Les informations de titre, résumé et auteurs sont récupérées depuis les onglets correspondants.
       </Alert>
 
-      {/* Titre */}
-      <TextField
-        label="Titre *"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        fullWidth
-        sx={{ mb: 3 }}
-      />
+      {/* Titre et Résumé (Lecture seule avec lien de navigation) */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ color: '#6F7977', fontWeight: 600 }}>
+            TITRE ET RÉSUMÉ
+          </Typography>
+          <Button
+            size="small"
+            onClick={() => onTabChange?.(0)}
+            sx={{ color: '#006A61', textTransform: 'none', fontWeight: 600 }}
+          >
+            Modifier dans Infos bibliographiques
+          </Button>
+        </Box>
+        <Paper elevation={0} sx={{ p: 2, bgcolor: '#F5F7F6', borderRadius: '8px', border: '1px solid #E5E7E6' }}>
+          <Typography sx={{ color: '#2D3836', fontWeight: 600, mb: 1, fontSize: '0.9375rem' }}>
+            {title || 'Aucun titre renseigné'}
+          </Typography>
+          <Typography
+            sx={{
+              color: '#6F7977',
+              fontSize: '0.875rem',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}
+          >
+            {abstract || 'Aucun résumé renseigné'}
+          </Typography>
+        </Paper>
+      </Box>
 
-      {/* Résumé */}
-      <TextField
-        label="Résumé *"
-        value={abstract}
-        onChange={(e) => setAbstract(e.target.value)}
-        fullWidth
-        multiline
-        rows={4}
-        sx={{ mb: 3 }}
-      />
+      {/* Auteurs et Affiliations (Lecture seule avec lien de navigation) */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ color: '#6F7977', fontWeight: 600 }}>
+            AUTEURS ET AFFILIATIONS
+          </Typography>
+          <Button
+            size="small"
+            onClick={() => onTabChange?.(4)}
+            sx={{ color: '#006A61', textTransform: 'none', fontWeight: 600 }}
+          >
+            Modifier dans l'onglet Auteurs
+          </Button>
+        </Box>
+        <Paper elevation={0} sx={{ p: 2, bgcolor: '#F5F7F6', borderRadius: '8px', border: '1px solid #E5E7E6' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {authors.map((author, idx) => (
+              <Box key={idx} sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Typography sx={{ color: '#2D3836', fontWeight: 600, fontSize: '0.875rem' }}>
+                  {author.name}
+                  <Typography component="span" sx={{ color: '#6F7977', fontSize: '0.75rem', ml: 1, fontWeight: 400, fontStyle: 'italic' }}>
+                    ({authorFunctions.find(f => f.value === author.function)?.label || author.function})
+                  </Typography>
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                  {author.affiliations.map((aff, affIdx) => (
+                    <Chip
+                      key={affIdx}
+                      label={aff.shortName || aff.halStructureName}
+                      size="small"
+                      sx={{
+                        bgcolor: 'white',
+                        border: '1px solid #E5E7E6',
+                        fontSize: '0.75rem',
+                        height: '24px'
+                      }}
+                    />
+                  ))}
+                  {author.affiliations.length === 0 && (
+                    <Typography sx={{ color: '#9CA3AF', fontSize: '0.75rem' }}>Pas d'affiliations renseignées</Typography>
+                  )}
+                </Box>
+              </Box>
+            ))}
+            {authors.length === 0 && (
+              <Typography sx={{ color: '#6F7977', fontSize: '0.875rem' }}>Aucun auteur renseigné</Typography>
+            )}
+          </Box>
+        </Paper>
+      </Box>
+
+      <Typography variant="subtitle2" sx={{ color: '#6F7977', fontWeight: 600, mb: 2 }}>
+        MÉTADONNÉES DE DÉPÔT
+      </Typography>
 
       {/* Type de document */}
       <FormControl fullWidth sx={{ mb: 3 }}>
@@ -467,12 +545,7 @@ export function HalDepositForm({
         </Select>
       </FormControl>
 
-      <Divider sx={{ my: 3 }} />
-
-      {/* Auteurs et Affiliations */}
-      <AuthorAffiliationManager authors={authors} onChange={setAuthors} />
-
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ my: 4 }} />
 
       {/* Domaines HAL */}
       <Autocomplete

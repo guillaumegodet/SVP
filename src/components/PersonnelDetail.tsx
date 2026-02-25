@@ -18,6 +18,7 @@ import {
     Tab,
     Paper,
     Grid,
+    Stack,
     Chip,
     Avatar,
     Table,
@@ -172,23 +173,23 @@ export default function PersonnelDetail() {
 
                     <Box sx={{ p: 4 }}>
                         {activeTab === 0 && (
-                            <Grid container spacing={6}>
+                            <Grid container spacing={6} sx={{ mb: 4 }}>
                                 <Grid item xs={12} md={6}>
                                     <Box sx={{ mb: 4 }}>
                                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Identité et contact</Typography>
-                                        <div className="space-y-4">
+                                        <Stack spacing={2}>
                                             <TextField fullWidth label="Prénom" value={researcher.firstName} onChange={(e) => handleUpdateField('firstName', e.target.value)} />
                                             <TextField fullWidth label="Nom" value={researcher.lastName} onChange={(e) => handleUpdateField('lastName', e.target.value)} />
                                             <TextField fullWidth label="Email de contact" value={researcher.email} onChange={(e) => handleUpdateField('email', e.target.value)} />
                                             <TextField fullWidth label="Email professionnel" value={researcher.professionalEmail} onChange={(e) => handleUpdateField('professionalEmail', e.target.value)} />
                                             <TextField fullWidth label="Date de naissance" type="date" InputLabelProps={{ shrink: true }} value={researcher.birthDate} onChange={(e) => handleUpdateField('birthDate', e.target.value)} />
-                                        </div>
+                                        </Stack>
                                     </Box>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
-                                    <Box sx={{ mb: 4 }}>
+                                    <Box>
                                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, color: '#00201D' }}>Parcours et identifiants</Typography>
-                                        <div className="space-y-4">
+                                        <Stack spacing={2}>
                                             <TextField fullWidth label="Grade / Corps" value={researcher.rank} onChange={(e) => handleUpdateField('rank', e.target.value)} />
                                             <TextField fullWidth label="Employeur" value={researcher.employer} onChange={(e) => handleUpdateField('employer', e.target.value)} />
                                             <TextField fullWidth label="Date d'arrivée dans la position" type="date" InputLabelProps={{ shrink: true }} value={researcher.arrivalDate} onChange={(e) => handleUpdateField('arrivalDate', e.target.value)} />
@@ -206,7 +207,7 @@ export default function PersonnelDetail() {
                                                 onChange={(e) => handleUpdateField('idref', e.target.value)}
                                                 InputProps={{ endAdornment: <ExternalLink size={18} className="text-gray-400 cursor-pointer" /> }}
                                             />
-                                        </div>
+                                        </Stack>
                                     </Box>
                                 </Grid>
                             </Grid>

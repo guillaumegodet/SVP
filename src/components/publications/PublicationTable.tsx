@@ -8,7 +8,6 @@ import {
     Eye,
     Clock,
     Star,
-    Upload,
     Trash2,
     Unlock,
     ChevronLeft,
@@ -52,8 +51,6 @@ interface PublicationTableProps {
     handleHalStatusClick: (pub: Publication, event: React.MouseEvent<HTMLElement>) => void;
     handlePublicationClick: (pub: Publication) => void;
     setSelectedPublicationHistory: (history: HistoryEvent[] | null) => void;
-    setSelectedPublication: (pub: Publication | null) => void;
-    setShowHalDepositModal: (show: boolean) => void;
     searchType: 'chercheur' | 'laboratoire';
     openActionMenuIndex: number | null;
     setOpenActionMenuIndex: (index: number | null) => void;
@@ -77,8 +74,6 @@ export default function PublicationTable({
     handleHalStatusClick,
     handlePublicationClick,
     setSelectedPublicationHistory,
-    setSelectedPublication,
-    setShowHalDepositModal,
     searchType,
     openActionMenuIndex,
     setOpenActionMenuIndex
@@ -573,33 +568,7 @@ export default function PublicationTable({
                                                                 )}
                                                             </button>
 
-                                                            {(pub.status === 'Dans HAL' || pub.status === 'Hors HAL') && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setOpenActionMenuIndex(null);
-                                                                        setSelectedPublication(pub);
-                                                                        setShowHalDepositModal(true);
-                                                                    }}
-                                                                    style={{
-                                                                        width: '100%',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        gap: '12px',
-                                                                        padding: '8px 16px',
-                                                                        border: 'none',
-                                                                        background: 'none',
-                                                                        cursor: 'pointer',
-                                                                        fontSize: '0.875rem',
-                                                                        textAlign: 'left',
-                                                                        color: SvpColors.textPrimary
-                                                                    }}
-                                                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.05)' : '#f5f5f5'}
-                                                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                                                >
-                                                                    <Upload size={16} color={SvpColors.textSecondary} />
-                                                                    <span>Déposer sur HAL</span>
-                                                                </button>
-                                                            )}
+
 
                                                             <Divider sx={{ my: 1 }} />
 

@@ -253,7 +253,7 @@ export default function Sidebar({ searchType, setSearchType, isDarkMode, setIsDa
               }}
             >
               <Users size={24} />
-              <SvpTypography sx={{ color: 'inherit' }}>Personnel de recherche</SvpTypography>
+              <SvpTypography sx={{ color: 'inherit', textAlign: 'left' }}>Personnel de recherche</SvpTypography>
             </SvpBox>
           </Link>
         </SvpBox>

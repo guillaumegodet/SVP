@@ -122,6 +122,10 @@ export const getHalStatusInfo = (pub: Publication, labName: string = 'LPED') => 
 export const publications: Publication[] = [
     {
         title: "Is Resilience a Consensual Concept? A Quantitative Assessment of Food Security Projects in Burkina Faso",
+        titles: {
+            fr: "La résilience est-elle un concept consensuel ? Une évaluation quantitative des projets de sécurité alimentaire au Burkina Faso",
+            en: "Is Resilience a Consensual Concept? A Quantitative Assessment of Food Security Projects in Burkina Faso"
+        },
         authors: "Pierre Janin, Quentin Boudot",
         date: "2024-09-08",
         status: "Dans HAL",
@@ -130,6 +134,10 @@ export const publications: Publication[] = [
         journal: "Food Policy",
         type: "ART",
         abstract: "This article examines the concept of resilience in food security projects through a quantitative assessment of various initiatives in Burkina Faso.",
+        abstracts: {
+            fr: "Cet article examine le concept de résilience dans les projets de sécurité alimentaire à travers une évaluation quantitative de diverses initiatives au Burkina Faso.",
+            en: "This article examines the concept of resilience in food security projects through a quantitative assessment of various initiatives in Burkina Faso."
+        },
         doi: "10.1007/s41055-024-00123-4",
         hal: "hal-05357889",
         sudocPpn: "193726130",
@@ -171,6 +179,10 @@ export const publications: Publication[] = [
     },
     {
         title: "Assessing the sustainability of food systems in sub- and Mediterranean & middle east_none_contributors",
+        titles: {
+            fr: "Évaluation de la durabilité des systèmes alimentaires en Méditerranée et au Moyen-Orient",
+            en: "Assessing the sustainability of food systems in sub- and Mediterranean & middle east_none_contributors"
+        },
         authors: "Estella Fourat, Éric Blanchart, Miriam Carù",
         date: "2024-01-01",
         status: "Dans HAL",
@@ -179,6 +191,10 @@ export const publications: Publication[] = [
         journal: "Global Food Security",
         type: "ART",
         abstract: "A comprehensive study on the sustainability of food systems across Mediterranean and Middle Eastern regions.",
+        abstracts: {
+            fr: "Une étude complète sur la durabilité des systèmes alimentaires dans les régions de la Méditerranée et du Moyen-Orient.",
+            en: "A comprehensive study on the sustainability of food systems across Mediterranean and Middle Eastern regions."
+        },
         doi: "10.1371/journal.pstr.0000123",
         hal: "hal-04892345",
         sudocPpn: "194523456",
@@ -321,6 +337,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'UMR Prodig',
         position: 'Directeur de recherche',
         employer: 'IRD',
+        affiliation: 'Directeur de recherche IRD, UMR Prodig',
         orcid: 'https://orcid.org/0000-0002-1234-5678',
         hal: 'https://hal.science/search/index/?q=pierre-janin',
         idref: 'https://www.idref.fr/027253139',
@@ -333,6 +350,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'UMR Prodig',
         position: 'Doctorant',
         employer: 'Université Paris 1',
+        affiliation: 'Doctorant Université Paris 1, UMR Prodig',
         orcid: 'https://orcid.org/0000-0003-9876-5432',
         hal: 'https://hal.science/search/index/?q=quentin-boudot',
         isInternal: true
@@ -344,6 +362,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'LISIS',
         position: 'Maître de conférence',
         employer: 'Université Paris-Est',
+        affiliation: 'Laboratoire Interdisciplinaire Sciences Innovations Sociétés (LISIS)',
         orcid: 'https://orcid.org/0000-0001-2345-6789',
         hal: 'https://hal.science/search/index/?q=estella-fourat',
         idref: 'https://www.idref.fr/123456789'
@@ -355,6 +374,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'UMR Eco&Sols',
         position: 'Directeur de recherche',
         employer: 'IRD',
+        affiliation: 'Directeur de recherche IRD, UMR Eco&Sols',
         orcid: 'https://orcid.org/0000-0002-5555-4444',
         hal: 'https://hal.science/search/index/?q=eric-blanchart'
     },
@@ -365,6 +385,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'CESAER',
         position: 'Professeur',
         employer: 'AgroSup Dijon',
+        affiliation: 'Centre de recherche en histoire européenne comparée',
         orcid: 'https://orcid.org/0000-0003-7777-8888',
         hal: 'https://hal.science/search/index/?q=miriam-caru',
         idref: 'https://www.idref.fr/987654321'
@@ -376,6 +397,7 @@ export const authorsDatabase: { [key: string]: Author } = {
         laboratory: 'UMR Prodig',
         position: 'Chercheur',
         employer: 'CNRS',
+        affiliation: 'Chercheur CNRS, UMR Prodig',
         hal: 'https://hal.science/search/index/?q=eric-nanzou',
         isInternal: true
     }

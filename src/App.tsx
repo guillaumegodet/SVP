@@ -3,7 +3,7 @@ import { HashRouter, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import svgPaths from "./imports/svg-vt1w2gqizi";
 
-import HalDepositDialog from './components/HalDepositDialog';
+
 import Dashboard from './components/Dashboard';
 import Expertises from './components/Expertises';
 import Activities from './components/Activities';
@@ -105,8 +105,7 @@ function AppContent() {
   const [openActionMenuIndex, setOpenActionMenuIndex] = useState<number | null>(null);
 
   // HAL Deposit modal states
-  const [showHalDepositModal, setShowHalDepositModal] = useState(false);
-  const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
+
 
   // Author profile modal states
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
@@ -470,8 +469,6 @@ function AppContent() {
                   handlePublicationClick={handlePublicationClick}
                   openActionMenuIndex={openActionMenuIndex}
                   setOpenActionMenuIndex={setOpenActionMenuIndex}
-                  setSelectedPublication={setSelectedPublication}
-                  setShowHalDepositModal={setShowHalDepositModal}
                   setSelectedPublicationHistory={setSelectedPublicationHistory}
                   highlightedPublications={highlightedPublications}
                   setHighlightedPublications={setHighlightedPublications}
@@ -499,8 +496,6 @@ function AppContent() {
                   handlePublicationClick={handlePublicationClick}
                   openActionMenuIndex={openActionMenuIndex}
                   setOpenActionMenuIndex={setOpenActionMenuIndex}
-                  setSelectedPublication={setSelectedPublication}
-                  setShowHalDepositModal={setShowHalDepositModal}
                   setSelectedPublicationHistory={setSelectedPublicationHistory}
                   highlightedPublications={highlightedPublications}
                   setHighlightedPublications={setHighlightedPublications}
@@ -516,15 +511,7 @@ function AppContent() {
         )}
       </SvpBox>
 
-      {/* HAL Deposit Modal */}
-      <HalDepositDialog
-        open={showHalDepositModal}
-        onClose={() => {
-          setShowHalDepositModal(false);
-          setSelectedPublication(null);
-        }}
-        publication={selectedPublication}
-      />
+
 
       {/* History Modal */}
       <Dialog
@@ -668,10 +655,7 @@ function AppContent() {
                           {selectedAuthor.firstName} {selectedAuthor.lastName}
                         </Typography>
                         <Typography variant="body2" sx={{ color: '#6F7977', textAlign: 'center', mb: 1 }}>
-                          {selectedAuthor.laboratory}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#6F7977', textAlign: 'center', fontSize: '0.75rem' }}>
-                          {selectedAuthor.position}, {selectedAuthor.employer}
+                          {selectedAuthor.affiliation || selectedAuthor.laboratory}
                         </Typography>
                       </Box>
 
