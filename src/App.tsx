@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 
 import {
-  Button, Chip, Badge, Box, Typography, Tooltip,
+  Button, Chip, Badge, Box, Typography, Tooltip, Checkbox,
   IconButton, Divider, Paper, Popper, Fade, ClickAwayListener, Link as MuiLink, CardContent,
   Alert, AlertTitle, Dialog, DialogTitle, DialogContent
 } from '@mui/material';
@@ -60,7 +60,10 @@ import {
   // imgAvatar,
   imgOrcid,
   imgHalProfile,
-  imgIdref
+  imgIdref,
+  imgOpenAlex,
+  imgHal,
+  imgScanR
 } from './constants';
 
 
@@ -88,6 +91,8 @@ function AppContent() {
   const [selectedPublicationHistory, setSelectedPublicationHistory] = useState<HistoryEvent[] | null>(null);
   const [highlightedPublications, setHighlightedPublications] = useState<Set<string>>(new Set(['Is Resilience a Consensual Concept? A Quantitative Assessment of Food Security Projects in Burkina Faso', 'Assessing the sustainability of food systems in sub- and Mediterranean & middle east_none_contributors']));
 
+  const [selectedPublications, setSelectedPublications] = useState<Set<string>>(new Set());
+
   // List view filters and sort
   const [listSearchTerm, setListSearchTerm] = useState('');
   const [listStatusFilter, setListStatusFilter] = useState('all');
@@ -105,6 +110,29 @@ function AppContent() {
   const [openActionMenuIndex, setOpenActionMenuIndex] = useState<number | null>(null);
 
   // HAL Deposit modal states
+
+
+  // Fusion modal state
+  const [isFusionModalOpen, setIsFusionModalOpen] = useState(false);
+  const [mergeChecklist, setMergeChecklist] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (isFusionModalOpen) {
+      setMergeChecklist(new Set(selectedPublications));
+    }
+  }, [isFusionModalOpen, selectedPublications]);
+
+  const toggleMergeSelection = (pubTitle: string) => {
+    setMergeChecklist(prev => {
+      const next = new Set(prev);
+      if (next.has(pubTitle)) {
+        next.delete(pubTitle);
+      } else {
+        next.add(pubTitle);
+      }
+      return next;
+    });
+  };
 
 
   // Author profile modal states
@@ -471,6 +499,9 @@ function AppContent() {
                   setSelectedPublicationHistory={setSelectedPublicationHistory}
                   highlightedPublications={highlightedPublications}
                   setHighlightedPublications={setHighlightedPublications}
+                  selectedPublications={selectedPublications}
+                  setSelectedPublications={setSelectedPublications}
+                  setIsFusionModalOpen={setIsFusionModalOpen}
                   handleAuthorClick={handleAuthorClick}
                   handleJournalClick={handleJournalClick}
                   searchType={searchType}
@@ -498,6 +529,9 @@ function AppContent() {
                   setSelectedPublicationHistory={setSelectedPublicationHistory}
                   highlightedPublications={highlightedPublications}
                   setHighlightedPublications={setHighlightedPublications}
+                  selectedPublications={selectedPublications}
+                  setSelectedPublications={setSelectedPublications}
+                  setIsFusionModalOpen={setIsFusionModalOpen}
                   handleAuthorClick={handleAuthorClick}
                   handleJournalClick={handleJournalClick}
                   showFilters={showFilters}
@@ -580,6 +614,133 @@ function AppContent() {
               ))}
             </SvpBox>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Fusion Modal */}
+      <Dialog
+        open={isFusionModalOpen}
+        onClose={() => setIsFusionModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '12px' }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 3, borderBottom: `1px solid ${SvpColors.border}` }}>
+          <SvpBox align="center" sx={{ gap: 1 }}>
+            <SvpTypography sx={{ fontSize: '1.25rem', fontWeight: 600, color: SvpColors.primary }}>
+              Fusionner les publications
+            </SvpTypography>
+          </SvpBox>
+          <SvpIconButton onClick={() => setIsFusionModalOpen(false)}>
+            <X size={20} />
+          </SvpIconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
+          <SvpBox flexDir="column" sx={{ gap: 3 }}>
+            <Alert icon={<InfoIcon fontSize="inherit" />} severity="info">
+              Vous êtes sur le point de fusionner les publications sélectionnées.
+            </Alert>
+
+            <SvpBox flexDir="column" sx={{ gap: 2 }}>
+              {Array.from(selectedPublications).map((pubTitle, index) => {
+                const pub = publications.find(p => p.title === pubTitle);
+                if (!pub) return null;
+
+                return (
+                  <SvpSurface key={index} sx={{ p: 1, border: `1px solid ${SvpColors.border}`, backgroundColor: '#f9f9f9', display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                    <Checkbox
+                      checked={mergeChecklist.has(pubTitle)}
+                      onChange={() => toggleMergeSelection(pubTitle)}
+                      sx={{ color: SvpColors.primary, '&.Mui-checked': { color: SvpColors.primary }, p: 0, mt: 0.25, '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                    />
+                    <SvpBox flexDir="column" sx={{ flex: 1, gap: 0.5 }}>
+                      <SvpTypography sx={{ fontWeight: 600, color: SvpColors.primary, fontSize: '0.85rem', lineHeight: 1.2 }}>
+                        {pub.title}
+                      </SvpTypography>
+
+                      <SvpTypography sx={{ fontSize: '0.75rem', color: SvpColors.textSecondary, lineHeight: 1.2 }}>
+                        {pub.date}  ·  {pub.authors}   ·  <span style={{ fontStyle: 'italic' }}>{pub.journal || pub.source || 'N/A'}</span>
+                      </SvpTypography>
+
+                      <SvpBox align="center" justify="space-between" sx={{ mt: 0.25 }}>
+                        <SvpBox align="center" sx={{ gap: 1, flexWrap: 'wrap' }}>
+                          {/* Type SoVisu+ Small */}
+                          <SvpBox align="center" sx={{ gap: 0.5, bgcolor: '#e0f2f1', px: 0.75, py: 0.1, borderRadius: 0.5, border: '1px solid #b2dfdb' }}>
+                            <SvpTypography sx={{ fontSize: '0.65rem', fontWeight: 600, color: '#006a61' }}>
+                              {pub.type === 'ART' ? 'Revue' : pub.type === 'COMM' ? 'Conf.' : pub.type === 'THESE' ? 'Thèse' : 'Livre'}
+                            </SvpTypography>
+                          </SvpBox>
+
+                          {/* Source badges with types */}
+                          {pub.dataSources?.map((source, sIdx) => {
+                            const img = source === 'OpenAlex' ? imgOpenAlex : source === 'HAL' ? imgHal : source === 'ScanR' ? imgScanR : null;
+                            let sourceTypeName = 'Art.';
+                            if (pub.type === 'ART') {
+                              sourceTypeName = source === 'HAL' ? 'Revue' : source === 'OpenAlex' ? 'Journal' : 'Art.';
+                            } else if (pub.type === 'COMM') {
+                              sourceTypeName = 'Conf.';
+                            } else if (pub.type === 'THESE') {
+                              sourceTypeName = 'Thèse';
+                            } else {
+                              sourceTypeName = 'Livre';
+                            }
+
+                            return (
+                              <SvpBox key={sIdx} align="center" sx={{ gap: 0.5, bgcolor: '#f5f5f5', px: 0.75, py: 0.1, borderRadius: 0.5, border: '1px solid #e0e0e0' }}>
+                                <SvpTypography sx={{ fontSize: '0.65rem', color: '#424242' }}>
+                                  {sourceTypeName}
+                                </SvpTypography>
+                                {img && <img src={img} alt={source} style={{ width: 12, height: 12 }} />}
+                              </SvpBox>
+                            );
+                          })}
+                        </SvpBox>
+
+                        <SvpTypography
+                          onClick={() => {
+                            const pubId = encodeURIComponent(pub.title.substring(0, 50).replace(/\s+/g, '-').toLowerCase());
+                            setIsFusionModalOpen(false);
+                            navigate(`/publication/${pubId}`, { state: { publication: pub, activeTab: 3 } });
+                          }}
+                          sx={{
+                            fontSize: '0.7rem',
+                            color: SvpColors.primary,
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            fontWeight: 500,
+                            '&:hover': {
+                              color: SvpColors.primaryHover
+                            }
+                          }}
+                        >
+                          Détail
+                        </SvpTypography>
+                      </SvpBox>
+                    </SvpBox>
+                  </SvpSurface>
+                );
+              })}
+            </SvpBox>
+
+            <SvpBox justify="flex-end" sx={{ gap: 2, mt: 2 }}>
+              <SvpButton variant="outlined" onClick={() => setIsFusionModalOpen(false)}>
+                Annuler
+              </SvpButton>
+              <SvpButton 
+                variant="contained" 
+                disabled={mergeChecklist.size === 0}
+                sx={{ backgroundColor: SvpColors.primary, '&:hover': { backgroundColor: SvpColors.primaryHover } }}
+                onClick={() => {
+                  // Logique de fusion (mock)
+                  setIsFusionModalOpen(false);
+                }}
+              >
+                Confirmer la fusion {mergeChecklist.size > 0 ? `(${mergeChecklist.size})` : ''}
+              </SvpButton>
+            </SvpBox>
+          </SvpBox>
         </DialogContent>
       </Dialog>
 
