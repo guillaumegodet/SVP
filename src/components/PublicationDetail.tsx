@@ -284,20 +284,92 @@ function PublicationDetail({ publications }: { publications: Publication[] }) {
   // Initialisation des auteurs à partir de la publication
   useEffect(() => {
     if (publication?.authors && authors.length === 0) {
-      setAuthors(publication.authors.split(', ').map((name: string, idx: number) => ({
-        name,
-        function: idx === 0 ? 'auteur_correspondant' : 'auteur',
-        idhal: idx === 0 ? 'jean-dupont' : undefined,
-        orcid: idx === 0 ? '0000-0001-2345-6789' : undefined,
-        email: idx === 0 ? 'jean.dupont@example.com' : undefined,
-        affiliations: [{
-          halStructureId: '102312',
-          halStructureName: 'UMR LPED - Laboratoire Population Environnement Développement',
-          shortName: 'UMR LPED',
-          foundViaRor: true,
-          ror: '05q3vnk25'
-        }]
-      })));
+      const names = publication.authors.split(', ');
+      const alignedAffiliation = {
+        halStructureId: '102312',
+        halStructureName: 'UMR LPED – Laboratoire Population Environnement Développement',
+        shortName: 'UMR LPED',
+        foundViaRor: true,
+        ror: '00znkfx48'
+      };
+
+      setAuthors(names.map((name: string, idx: number) => {
+        // 1er auteur : aligné, avec IdHAL et affiliation alignée (cas "tout va bien")
+        if (idx === 0) {
+          return {
+            name,
+            function: 'auteur_correspondant',
+            idhal: 'quentin-boudot',
+            orcid: '0000-0001-2345-6789',
+            email: 'quentin.boudot@example.com',
+            affiliations: [alignedAffiliation]
+          };
+        }
+        // 2e auteur : sans IdHAL → candidats AureHAL à confirmer
+        if (idx === 1) {
+          return {
+            name,
+            function: 'auteur',
+            idhal: undefined,
+            affiliations: [alignedAffiliation],
+            idhalCandidates: [
+              {
+                idhal: 'pierre-janin',
+                fullName: 'Pierre JANIN',
+                affiliations: 'UMR LPED · IRD',
+                publications: 24,
+                matchScore: 96,
+                orcid: '0000-0002-1111-2222'
+              },
+              {
+                idhal: 'p-janin-inrae',
+                fullName: 'Pierre Janin',
+                affiliations: 'INRAE Montpellier',
+                publications: 12,
+                matchScore: 71
+              },
+              {
+                idhal: 'pjanin-cnrs',
+                fullName: 'Pierre J. Janin',
+                affiliations: 'CNRS · UMR 7194',
+                publications: 8,
+                matchScore: 64
+              }
+            ]
+          };
+        }
+        // 3e auteur (et suivants) : avec IdHAL mais une affiliation non alignée (texte importé)
+        return {
+          name,
+          function: 'auteur',
+          idhal: 'marie-dubois-23',
+          affiliations: [{
+            halStructureId: '',
+            halStructureName: '',
+            importedText: 'Laboratoire des sciences du numérique',
+            structureCandidates: [
+              {
+                halStructureId: '102313',
+                shortName: 'LS2N',
+                fullName: 'Laboratoire des sciences du numérique à Nantes',
+                tutelles: 'Nantes Université · CNRS · École Centrale · IMT Atl.',
+                ror: '04ezmvf85',
+                researchers: 470,
+                matchScore: 92
+              },
+              {
+                halStructureId: '102317',
+                shortName: 'LSN',
+                fullName: 'Laboratoire des sciences du numérique',
+                tutelles: 'Université Paris-Saclay',
+                ror: '0395g4t98',
+                researchers: 64,
+                matchScore: 71
+              }
+            ]
+          }]
+        };
+      }));
     }
   }, [publication, authors.length]);
 
