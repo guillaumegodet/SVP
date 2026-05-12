@@ -27,7 +27,8 @@ import {
     SvpTypography,
     SvpSurface,
     SvpIconButton,
-    SvpColors
+    SvpColors,
+    SvpButton
 } from '../ui/SvpWrappers';
 import { Publication, HistoryEvent } from '../../types';
 import { getOpenAccessInfo, getHalStatusInfo, imgOpenAlex, imgHal, imgScanR } from '../../constants';
@@ -54,6 +55,9 @@ interface PublicationTableProps {
     searchType: 'chercheur' | 'laboratoire';
     openActionMenuIndex: number | null;
     setOpenActionMenuIndex: (index: number | null) => void;
+    selectedPublications: Set<string>;
+    setSelectedPublications: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setIsFusionModalOpen: (isOpen: boolean) => void;
 }
 
 export default function PublicationTable({
@@ -76,7 +80,10 @@ export default function PublicationTable({
     setSelectedPublicationHistory,
     searchType,
     openActionMenuIndex,
-    setOpenActionMenuIndex
+    setOpenActionMenuIndex,
+    selectedPublications,
+    setSelectedPublications,
+    setIsFusionModalOpen
 }: PublicationTableProps) {
     const theme = useTheme();
     const isDarkMode = theme.palette.mode === 'dark';
@@ -87,40 +94,63 @@ export default function PublicationTable({
             {/* Table filters and search */}
             <SvpBox flexDir="column" sx={{ p: 2, borderBottom: `1px solid ${SvpColors.border}` }}>
                 <SvpBox align="center" sx={{ gap: 2, flexWrap: 'wrap', mb: 2 }}>
-                    <SvpBox sx={{ flex: 1, minWidth: '300px' }}>
-                        <SvpBox sx={{ position: 'relative' }}>
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: SvpColors.textSecondary }} />
-                            <input
-                                type="text"
-                                placeholder={searchType === 'chercheur' ? 'Rechercher un chercheur' : 'Rechercher une structure de recherche'}
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px 12px 10px 40px',
-                                    border: `1px solid ${SvpColors.border}`,
-                                    borderRadius: '8px',
-                                    outline: 'none',
-                                    fontSize: '0.875rem',
-                                    backgroundColor: 'var(--svp-surface)',
-                                    color: SvpColors.textPrimary
+                    <SvpBox sx={{ flex: 1, display: 'flex' }}>
+                        <SvpButton
+                            variant="contained"
+                            disabled={selectedPublications.size < 2}
+                            onClick={() => setIsFusionModalOpen(true)}
+                            sx={{
+                                backgroundColor: selectedPublications.size >= 2 ? SvpColors.primary : '#e0e0e0',
+                                color: selectedPublications.size >= 2 ? '#fff' : '#9e9e9e',
+                                textTransform: 'none',
+                                fontWeight: 500,
+                                borderRadius: '8px',
+                                px: 3,
+                                '&:hover': {
+                                    backgroundColor: selectedPublications.size >= 2 ? SvpColors.primaryHover : '#e0e0e0'
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#e0e0e0',
+                                    color: '#9e9e9e'
+                                }
+                            }}
+                        >
+                            Fusionner les publications
+                        </SvpButton>
+                    </SvpBox>
+
+                    <SvpBox sx={{ position: 'relative', width: '300px' }}>
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4" style={{ color: SvpColors.textSecondary }} />
+                        <input
+                            type="text"
+                            placeholder="Rechercher"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px 12px 10px 40px',
+                                border: `1px solid ${SvpColors.border}`,
+                                borderRadius: '8px',
+                                outline: 'none',
+                                fontSize: '0.875rem',
+                                backgroundColor: 'var(--svp-surface)',
+                                color: SvpColors.textPrimary
+                            }}
+                        />
+                        {searchTerm && (
+                            <SvpIconButton
+                                onClick={() => setSearchTerm('')}
+                                sx={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    padding: '4px'
                                 }}
-                            />
-                            {searchTerm && (
-                                <SvpIconButton
-                                    onClick={() => setSearchTerm('')}
-                                    sx={{
-                                        position: 'absolute',
-                                        right: '8px',
-                                        top: '50%',
-                                        transform: 'translateY(-50%)',
-                                        padding: '4px'
-                                    }}
-                                >
-                                    <X size={16} />
-                                </SvpIconButton>
-                            )}
-                        </SvpBox>
+                            >
+                                <X size={16} />
+                            </SvpIconButton>
+                        )}
                     </SvpBox>
 
                     <select
@@ -321,7 +351,22 @@ export default function PublicationTable({
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         <td style={{ padding: '12px 16px' }}>
-                                            <input type="checkbox" style={{ borderRadius: '4px' }} />
+                                            <input
+                                                type="checkbox"
+                                                style={{ borderRadius: '4px', cursor: 'pointer', width: '16px', height: '16px' }}
+                                                checked={selectedPublications.has(pub.title)}
+                                                onChange={() => {
+                                                    setSelectedPublications(prev => {
+                                                        const newSet = new Set(prev);
+                                                        if (newSet.has(pub.title)) {
+                                                            newSet.delete(pub.title);
+                                                        } else {
+                                                            newSet.add(pub.title);
+                                                        }
+                                                        return newSet;
+                                                    });
+                                                }}
+                                            />
                                         </td>
                                         <td style={{ padding: '12px 16px' }}>
                                             <span style={{

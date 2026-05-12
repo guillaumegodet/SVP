@@ -11,6 +11,7 @@ import Sidebar from './components/Sidebar';
 import PublicationDetail from './components/PublicationDetail';
 import PersonnelRecherche from './components/PersonnelRecherche';
 import PersonnelDetail from './components/PersonnelDetail';
+import WelcomePopup from './components/WelcomePopup';
 import PublicationTable from './components/publications/PublicationTable';
 import PublicationList from './components/publications/PublicationList';
 import {
@@ -134,6 +135,14 @@ function AppContent() {
     });
   };
 
+  const toggleSelectAllMerge = () => {
+    if (mergeChecklist.size === selectedPublications.size) {
+      setMergeChecklist(new Set());
+    } else {
+      setMergeChecklist(new Set(selectedPublications));
+    }
+  };
+
 
   // Author profile modal states
   const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
@@ -151,6 +160,18 @@ function AppContent() {
   // SCENARIO A (IdHAL manquant): userIdHal = ''
   // SCENARIO B (IdHAL présent): userIdHal = 'pierre-janin' (or any non-empty string)
   const [userIdHal, setUserIdHal] = useState('pierre-janin'); // Toggle via UI button to test both scenarios
+  const [userOrcid, setUserOrcid] = useState(''); // Mock empty ORCID for demonstration
+  const [userIdRef, setUserIdRef] = useState(''); // Mock empty IdRef for demonstration
+  const [isWelcomePopupOpen, setIsWelcomePopupOpen] = useState(false);
+
+  // Logic for first-time connection
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('svp_has_visited');
+    if (!hasVisited) {
+      setIsWelcomePopupOpen(true);
+      localStorage.setItem('svp_has_visited', 'true');
+    }
+  }, []);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -229,6 +250,7 @@ function AppContent() {
             setSearchType={setSearchType}
             isDarkMode={isDarkMode}
             setIsDarkMode={setIsDarkMode}
+            onOpenWelcomePopup={() => setIsWelcomePopupOpen(true)}
           />
         </Box>
       )}
@@ -277,6 +299,10 @@ function AppContent() {
           setSearchType={setSearchType}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
+          onOpenWelcomePopup={() => {
+            setIsWelcomePopupOpen(true);
+            setIsMobileMenuOpen(false);
+          }}
           onClose={() => setIsMobileMenuOpen(false)}
         />
       </Drawer>
@@ -335,6 +361,58 @@ function AppContent() {
                         <>
                           <AlertCircle className="size-4" style={{ color: '#ED6C02' }} />
                           <span className={isDarkMode ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm'}>IdHAL manquant</span>
+                        </>
+                      )}
+                    </button>
+                  </Tooltip>
+                  
+                  {/* ORCID Toggle */}
+                  <Tooltip
+                    title={userOrcid ? "ORCID: 0000-0002-1234-5678 (Cliquez pour supprimer)" : "ORCID manquant (Cliquez pour ajouter)"}
+                    arrow
+                  >
+                    <button
+                      onClick={() => setUserOrcid(userOrcid ? '' : '0000-0002-1234-5678')}
+                      className={`flex items-center gap-2 px-4 py-2 border rounded-full transition-colors ${isDarkMode
+                        ? 'border-gray-600 hover:bg-[#2a2a2a]'
+                        : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                      {userOrcid ? (
+                        <>
+                          <Check className="size-4" style={{ color: '#A6CE39' }} />
+                          <span className={isDarkMode ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm'}>ORCID: OK</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="size-4" style={{ color: '#ED6C02' }} />
+                          <span className={isDarkMode ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm'}>ORCID manquant</span>
+                        </>
+                      )}
+                    </button>
+                  </Tooltip>
+
+                  {/* IdRef Toggle */}
+                  <Tooltip
+                    title={userIdRef ? "IdRef: 027253139 (Cliquez pour supprimer)" : "IdRef manquant (Cliquez pour ajouter)"}
+                    arrow
+                  >
+                    <button
+                      onClick={() => setUserIdRef(userIdRef ? '' : '027253139')}
+                      className={`flex items-center gap-2 px-4 py-2 border rounded-full transition-colors ${isDarkMode
+                        ? 'border-gray-600 hover:bg-[#2a2a2a]'
+                        : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                    >
+                      {userIdRef ? (
+                        <>
+                          <Check className="size-4" style={{ color: '#003B6B' }} />
+                          <span className={isDarkMode ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm'}>IdRef: OK</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="size-4" style={{ color: '#ED6C02' }} />
+                          <span className={isDarkMode ? 'text-gray-300 text-sm' : 'text-gray-700 text-sm'}>IdRef manquant</span>
                         </>
                       )}
                     </button>
@@ -639,9 +717,22 @@ function AppContent() {
         </DialogTitle>
         <DialogContent sx={{ p: 4 }}>
           <SvpBox flexDir="column" sx={{ gap: 3 }}>
-            <Alert icon={<InfoIcon fontSize="inherit" />} severity="info">
-              Vous êtes sur le point de fusionner les publications sélectionnées.
-            </Alert>
+            <SvpBox align="center" justify="space-between" sx={{ px: 1 }}>
+              <Alert icon={<InfoIcon fontSize="inherit" />} severity="info" sx={{ flex: 1, mr: 2 }}>
+                Vous êtes sur le point de fusionner les publications sélectionnées.
+              </Alert>
+              <SvpBox align="center" sx={{ gap: 1, minWidth: 'fit-content' }}>
+                <Checkbox
+                  indeterminate={mergeChecklist.size > 0 && mergeChecklist.size < selectedPublications.size}
+                  checked={mergeChecklist.size === selectedPublications.size && selectedPublications.size > 0}
+                  onChange={toggleSelectAllMerge}
+                  sx={{ color: SvpColors.primary, '&.Mui-checked': { color: SvpColors.primary }, p: 0 }}
+                />
+                <SvpTypography sx={{ fontSize: '0.85rem', fontWeight: 600, color: SvpColors.primary }}>
+                  Tout sélectionner
+                </SvpTypography>
+              </SvpBox>
+            </SvpBox>
 
             <SvpBox flexDir="column" sx={{ gap: 2 }}>
               {Array.from(selectedPublications).map((pubTitle, index) => {
@@ -1268,6 +1359,15 @@ function AppContent() {
           </Fade>
         )}
       </Popper>
+      {/* Welcome Popup */}
+      <WelcomePopup 
+        isOpen={isWelcomePopupOpen} 
+        onClose={() => setIsWelcomePopupOpen(false)}
+        userIdHal={userIdHal}
+        userOrcid={userOrcid}
+        userIdRef={userIdRef}
+        onNavigateToAccount={() => navigate('/mon-compte')}
+      />
     </SvpBox>
   );
 }

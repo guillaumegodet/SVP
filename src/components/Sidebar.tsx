@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, PanelLeftClose, Search, User, Building2, Activity, Users, Moon, Sun } from 'lucide-react';
+import { ChevronDown, PanelLeftClose, Search, User, Building2, Activity, Users, Moon, Sun, LogOut, Info } from 'lucide-react';
 import svgPaths from "../imports/svg-vt1w2gqizi";
 import {
   SvpBox,
@@ -14,11 +15,13 @@ interface SidebarProps {
   setSearchType: (type: 'chercheur' | 'laboratoire') => void;
   isDarkMode: boolean;
   setIsDarkMode: (value: boolean) => void;
+  onOpenWelcomePopup?: () => void;
   onClose?: () => void;
 }
 
-export default function Sidebar({ searchType, setSearchType, isDarkMode, setIsDarkMode, onClose }: SidebarProps) {
+export default function Sidebar({ searchType, setSearchType, isDarkMode, setIsDarkMode, onOpenWelcomePopup, onClose }: SidebarProps) {
   const location = useLocation();
+  const [isAccountExpanded, setIsAccountExpanded] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -335,36 +338,144 @@ export default function Sidebar({ searchType, setSearchType, isDarkMode, setIsDa
             </SvpBox>
           </SvpBox>
         </SvpBox>
-      </SvpBox>
 
-      {/* User profile */}
-      <SvpBox sx={{ px: 2, pb: 3 }}>
-        <SvpBox
-          align="center"
-          sx={{
-            gap: 1.5,
-            px: 2,
-            py: 1.5,
-            bgcolor: SvpColors.primaryHover,
-            borderRadius: 2
-          }}
-        >
+        {/* 1ère connexion */}
+        <SvpBox sx={{ mt: 1 }}>
           <SvpBox
+            component="button"
+            onClick={onOpenWelcomePopup}
             align="center"
-            justify="center"
             sx={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              bgcolor: '#9ef2e6'
+              gap: 1.5,
+              px: 2,
+              py: 1,
+              width: '100%',
+              bgcolor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#9ef2e6',
+              borderRadius: 2,
+              opacity: 0.8,
+              transition: 'opacity 0.2s',
+              '&:hover': { 
+                bgcolor: SvpColors.primaryHover,
+                opacity: 1
+              }
             }}
           >
-            <SvpTypography sx={{ color: SvpColors.primary, fontWeight: 600, fontSize: '0.875rem' }}>GG</SvpTypography>
+            <Info size={20} />
+            <SvpTypography sx={{ color: 'inherit', fontSize: '0.875rem' }}>
+              1ère connexion
+            </SvpTypography>
           </SvpBox>
-          <SvpBox flexDir="column" sx={{ flex: 1 }}>
-            <SvpTypography sx={{ color: '#fff', fontSize: '0.875rem' }}>Guillaume Godet</SvpTypography>
+        </SvpBox>
+      </SvpBox>
+      {/* User profile */}
+      <SvpBox flexDir="column" sx={{ px: 2, pb: 3, mt: 2 }}>
+        <SvpBox
+          flexDir="column"
+          sx={{
+            bgcolor: SvpColors.primaryHover,
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid rgba(158, 242, 230, 0.1)'
+          }}
+        >
+          {/* User Info (Header-like) - Clickable Toggle */}
+          <SvpBox
+            component="button"
+            onClick={() => setIsAccountExpanded(!isAccountExpanded)}
+            align="center"
+            sx={{
+              gap: 1.5,
+              px: 2,
+              py: 1.5,
+              width: '100%',
+              bgcolor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              textAlign: 'left',
+              borderBottom: isAccountExpanded ? '1px solid rgba(158, 242, 230, 0.05)' : 'none',
+              transition: 'all 0.2s',
+              '&:hover': {
+                bgcolor: 'rgba(158, 242, 230, 0.05)'
+              }
+            }}
+          >
+            <SvpBox
+              align="center"
+              justify="center"
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                bgcolor: '#9ef2e6',
+                flexShrink: 0
+              }}
+            >
+              <SvpTypography sx={{ color: SvpColors.primary, fontWeight: 700, fontSize: '0.75rem' }}>GG</SvpTypography>
+            </SvpBox>
+            <SvpBox sx={{ flex: 1, overflow: 'hidden' }}>
+              <SvpTypography noWrap sx={{ color: '#fff', fontSize: '0.8125rem', fontWeight: 600 }}>Guillaume Godet</SvpTypography>
+            </SvpBox>
+            <ChevronDown 
+              size={16} 
+              color="#9ef2e6" 
+              style={{ 
+                transform: isAccountExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
+              }} 
+            />
           </SvpBox>
-          <ChevronDown size={16} color="#9ef2e6" />
+
+          {/* Account Actions - Conditionally Rendered */}
+          {isAccountExpanded && (
+            <SvpBox flexDir="column">
+              <Link to="/mon-compte" style={{ textDecoration: 'none' }}>
+                <SvpBox
+                  align="center"
+                  sx={{
+                    gap: 1.5,
+                    px: 2,
+                    py: 1.25,
+                    color: '#9ef2e6',
+                    transition: 'all 0.2s',
+                    '&:hover': { 
+                      bgcolor: 'rgba(158, 242, 230, 0.1)',
+                      color: '#fff'
+                    }
+                  }}
+                >
+                  <User size={16} />
+                  <SvpTypography sx={{ color: 'inherit', fontSize: '0.8125rem' }}>Accéder à Mon compte</SvpTypography>
+                </SvpBox>
+              </Link>
+              
+              <SvpBox
+                component="button"
+                align="center"
+                sx={{
+                  gap: 1.5,
+                  px: 2,
+                  py: 1.25,
+                  bgcolor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  width: '100%',
+                  color: '#9ef2e6',
+                  transition: 'all 0.2s',
+                  '&:hover': { 
+                    bgcolor: 'rgba(239, 68, 68, 0.1)',
+                    color: '#f87171' // Red-ish for logout
+                  }
+                }}
+              >
+                <LogOut size={16} />
+                <SvpTypography sx={{ color: 'inherit', fontSize: '0.8125rem' }}>Se déconnecter</SvpTypography>
+              </SvpBox>
+            </SvpBox>
+          )}
         </SvpBox>
       </SvpBox>
     </SvpBox>

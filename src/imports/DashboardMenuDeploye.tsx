@@ -1091,8 +1091,8 @@ function Avatar1() {
 function NameAndRole() {
   return (
     <div className="css-m10r1w css-paq0kv css-v27th6" data-name="Name and role">
-      <p className="css-4hj742 css-nf5ac4 css-tech8z css-v27th6">Olivia Dupont</p>
-      <p className="css-bv771f css-nf5ac4 css-v27th6 css-wvln9p">LS2N</p>
+      <p className="css-4hj742 css-nf5ac4 css-tech8z css-v27th6">Guillaume Godet</p>
+      <p className="css-bv771f css-nf5ac4 css-v27th6 css-wvln9p">Bibliométrie</p>
     </div>
   );
 }
@@ -1101,7 +1101,7 @@ function NameAndSupportingText() {
   return (
     <div className="css-e9t7sk css-paq0kv css-v27th6" data-name="Name and supporting text">
       <NameAndRole />
-      <p className="css-971ofm css-nf5ac4 css-v27th6 css-vu63mz">Maitre de conférence, Nantes Université</p>
+      <p className="css-971ofm css-nf5ac4 css-v27th6 css-vu63mz">Chef du service Bibliométrie, Nantes Université</p>
     </div>
   );
 }

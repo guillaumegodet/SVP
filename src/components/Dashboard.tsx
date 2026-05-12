@@ -50,11 +50,13 @@ import {
   Public as PublicIcon,
   Schedule as ScheduleIcon
 } from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 
 // Import des images de la maquette Figma
 import imgImage22 from "figma:asset/0cb7103460abf945778a92dcb22acf2e89658bc1.png";
 import imgImage29 from "figma:asset/c84271b3b626cfe0134a518765d10c9495166976.png";
+import imgGuillaume from "../assets/guillaume_godet.png";
+import imgPictos from "../assets/academic_pictos.png";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -164,10 +166,11 @@ const Dashboard = () => {
 
   // Données pour le graphique Publications par année
   const publicationsData = [
-    { year: '2022', count: 4 },
-    { year: '2023', count: 5 },
-    { year: '2024', count: 4 },
-    { year: '2025', count: 5 },
+    { year: '2021', ouvert: 3, inconnu: 2, ferme: 0, ouvertLabel: '60%', inconnuLabel: '40%', fermeLabel: '' },
+    { year: '2022', ouvert: 6, inconnu: 3, ferme: 0, ouvertLabel: '67%', inconnuLabel: '33%', fermeLabel: '' },
+    { year: '2023', ouvert: 2, inconnu: 2, ferme: 2, ouvertLabel: '33%', inconnuLabel: '33%', fermeLabel: '33%' },
+    { year: '2024', ouvert: 3, inconnu: 0, ferme: 0, ouvertLabel: '100%', inconnuLabel: '', fermeLabel: '' },
+    { year: '2025', ouvert: 3, inconnu: 0, ferme: 0, ouvertLabel: '100%', inconnuLabel: '', fermeLabel: '' },
   ];
 
   // Projets en cours
@@ -280,13 +283,6 @@ const Dashboard = () => {
   };
 
   // Taux d'accès ouvert
-  const openAccessData = [
-    { year: '2018', rate: 25 },
-    { year: '2019', rate: 33 },
-    { year: '2020', rate: 40 },
-    { year: '2021', rate: 58 },
-    { year: '2022', rate: 65 },
-  ];
 
   // Principaux co-auteurs
   const topCoAuthors = [
@@ -354,36 +350,54 @@ const Dashboard = () => {
             <SvpSurface sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
                 <Avatar
+                  src={imgGuillaume}
                   sx={{
-                    width: 80,
-                    height: 80,
+                    width: 100,
+                    height: 100,
                     mb: 2,
                     bgcolor: SvpColors.primary,
                     fontSize: '2rem',
                     fontWeight: 600,
-                    color: '#fff'
+                    color: '#fff',
+                    border: `3px solid ${SvpColors.primaryLight}`
                   }}
                 >
-                  OD
+                  GG
                 </Avatar>
-                <SvpTypography variant="h6" sx={{ color: SvpColors.primary, fontWeight: 600, mb: 0.5 }}>
-                  Olivia Dupont
+                <SvpTypography variant="h6" sx={{ color: SvpColors.primary, fontWeight: 600, mb: 0.5, textAlign: 'center' }}>
+                  Guillaume Godet
                 </SvpTypography>
-                <SvpTypography variant="body2" sx={{ color: SvpColors.textSecondary, textAlign: 'center', mb: 2 }}>
-                  LS2N
+                <SvpTypography variant="body2" sx={{ color: SvpColors.textSecondary, textAlign: 'center', mb: 2, fontWeight: 500 }}>
+                  Chef du service Bibliométrie,<br />Nantes Université
                 </SvpTypography>
+
+                <Divider sx={{ width: '100%', my: 1.5, opacity: 0.5 }} />
+
+                <Box sx={{ display: 'flex', gap: 2, mt: 1, justifyContent: 'center' }}>
+                  <Box
+                    component="img"
+                    src={imgPictos}
+                    alt="Identifiants académiques"
+                    sx={{
+                      height: 32,
+                      maxWidth: '100%',
+                      objectFit: 'contain',
+                      filter: isDarkMode ? 'brightness(0.9) contrast(1.1)' : 'none'
+                    }}
+                  />
+                </Box>
               </Box>
             </SvpSurface>
 
             {/* Graphique Publications par année */}
             <SvpSurface sx={{ p: 3 }}>
               <SvpTypography variant="h6" sx={{ color: SvpColors.primary, fontWeight: 500, mb: 2 }}>
-                Nombre de publications par an
+                Nombre de publications par année et taux d'accès
               </SvpTypography>
               <Divider sx={{ mb: 2, borderColor: SvpColors.border }} />
-              <Box sx={{ width: '100%', height: 280, minHeight: 280 }}>
+              <Box sx={{ width: '100%', height: 320, minHeight: 320 }}>
                 {activeTab === 0 && (
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={320}>
                     <BarChart
                       data={publicationsData}
                       margin={{
@@ -393,7 +407,7 @@ const Dashboard = () => {
                         bottom: 5,
                       }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'} />
                       <XAxis
                         dataKey="year"
                         tick={{ fill: isDarkMode ? '#A0A0A0' : '#666666', fontSize: 12 }}
@@ -402,6 +416,8 @@ const Dashboard = () => {
                       <YAxis
                         tick={{ fill: isDarkMode ? '#A0A0A0' : '#666666', fontSize: 12 }}
                         axisLine={{ stroke: isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}
+                        domain={[0, 10]}
+                        tickCount={6}
                       />
                       <Tooltip
                         contentStyle={{
@@ -414,12 +430,16 @@ const Dashboard = () => {
                         itemStyle={{ color: isDarkMode ? '#E0E0E0' : '#2D3836' }}
                         cursor={{ fill: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(139, 92, 246, 0.1)' }}
                       />
-                      <Bar
-                        dataKey="count"
-                        fill="#8B5CF6"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={50}
-                      />
+                      <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }} />
+                      <Bar dataKey="ouvert" name="Accès Ouvert" stackId="a" fill="#92D050" maxBarSize={60}>
+                        <LabelList dataKey="ouvertLabel" position="center" style={{ fill: '#000', fontSize: '11px', fontWeight: 500 }} />
+                      </Bar>
+                      <Bar dataKey="ferme" name="Accès Fermé" stackId="a" fill="#4472C4" maxBarSize={60}>
+                        <LabelList dataKey="fermeLabel" position="center" style={{ fill: '#fff', fontSize: '11px', fontWeight: 500 }} />
+                      </Bar>
+                      <Bar dataKey="inconnu" name="Type d'accès inconnu" stackId="a" fill="#7F7F7F" maxBarSize={60}>
+                        <LabelList dataKey="inconnuLabel" position="center" style={{ fill: '#fff', fontSize: '11px', fontWeight: 500 }} />
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -498,63 +518,8 @@ const Dashboard = () => {
             </SvpSurface>
           </Box>
 
-          {/* Section Taux d'accès ouvert et Collaborations */}
-          <Box sx={{
-            display: 'grid',
-            gridTemplateColumns: isTablet ? '1fr' : '1fr 1fr',
-            gap: 2,
-            mb: 2
-          }}>
-            {/* Taux d'accès ouvert */}
-            <SvpSurface sx={{ p: 3 }}>
-              <SvpTypography variant="h6" sx={{ color: SvpColors.primary, fontWeight: 500, mb: 2 }}>
-                Taux d'accès ouvert des publications scientifiques
-              </SvpTypography>
-              <Divider sx={{ mb: 2, borderColor: SvpColors.border }} />
-              <Box sx={{ width: '100%', height: 280, minHeight: 280 }}>
-                {activeTab === 0 && (
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart
-                      data={openAccessData}
-                      margin={{
-                        top: 20,
-                        right: 30,
-                        left: 0,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'} />
-                      <XAxis
-                        dataKey="year"
-                        tick={{ fill: isDarkMode ? '#A0A0A0' : '#666666', fontSize: 12 }}
-                        axisLine={{ stroke: isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}
-                      />
-                      <YAxis
-                        tick={{ fill: isDarkMode ? '#A0A0A0' : '#666666', fontSize: 12 }}
-                        axisLine={{ stroke: isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: isDarkMode ? '#1A2322' : 'white',
-                          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'}`,
-                          borderRadius: 8,
-                          fontSize: 12,
-                          color: isDarkMode ? '#E0E0E0' : '#2D3836'
-                        }}
-                        itemStyle={{ color: isDarkMode ? '#E0E0E0' : '#2D3836' }}
-                        cursor={{ fill: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(139, 92, 246, 0.1)' }}
-                      />
-                      <Bar
-                        dataKey="rate"
-                        fill="#8B5CF6"
-                        radius={[4, 4, 0, 0]}
-                        maxBarSize={50}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </Box>
-            </SvpSurface>
+          {/* Section Collaborations internationales */}
+          <Box sx={{ mb: 2 }}>
 
             {/* Collaborations internationales */}
             <SvpSurface sx={{ p: 3 }}>

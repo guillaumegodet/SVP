@@ -31,6 +31,8 @@ Si vous venez d'ouvrir le projet ou si vous étiez sur la branche de déploiemen
 | `npm run build` | Prépare les fichiers pour la mise en ligne (dossier `build`) |
 | `npm run deploy` | Envoie la version compilée sur GitHub Pages |
 
+
+
 ## ⚠️ Points d'attention
 *   **Branche `gh-pages`** : Ne modifiez jamais de fichiers quand vous êtes sur cette branche. C'est une branche "automatique" qui ne contient que le résultat du build.
 *   **Port** : Le serveur est configuré sur le port `3000`.

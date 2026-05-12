@@ -64,6 +64,9 @@ interface PublicationListProps {
     searchType: 'chercheur' | 'laboratoire';
     openActionMenuIndex: number | null;
     setOpenActionMenuIndex: (index: number | null) => void;
+    selectedPublications: Set<string>;
+    setSelectedPublications: React.Dispatch<React.SetStateAction<Set<string>>>;
+    setIsFusionModalOpen: (isOpen: boolean) => void;
 }
 
 export default function PublicationList({
@@ -89,7 +92,10 @@ export default function PublicationList({
     setSelectedPublicationHistory,
     searchType,
     openActionMenuIndex,
-    setOpenActionMenuIndex
+    setOpenActionMenuIndex,
+    selectedPublications,
+    setSelectedPublications,
+    setIsFusionModalOpen
 }: PublicationListProps) {
     const { renderAuthors, renderJournal } = usePublicationRenderers({ handleAuthorClick, handleJournalClick });
     const theme = useTheme();
@@ -102,13 +108,39 @@ export default function PublicationList({
             {/* List view filters and sorting */}
             <SvpSurface sx={{ p: 2 }}>
                 <SvpBox align="center" sx={{ gap: 2, flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
+                    {/* Fusionner */}
+                    <SvpBox sx={{ flex: 1, display: 'flex' }}>
+                        <SvpButton
+                            variant="contained"
+                            disabled={selectedPublications.size < 2}
+                            onClick={() => setIsFusionModalOpen(true)}
+                            sx={{
+                                backgroundColor: selectedPublications.size >= 2 ? SvpColors.primary : '#e0e0e0',
+                                color: selectedPublications.size >= 2 ? '#fff' : '#9e9e9e',
+                                textTransform: 'none',
+                                fontWeight: 500,
+                                borderRadius: '8px',
+                                px: 3,
+                                '&:hover': {
+                                    backgroundColor: selectedPublications.size >= 2 ? SvpColors.primaryHover : '#e0e0e0'
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#e0e0e0',
+                                    color: '#9e9e9e'
+                                }
+                            }}
+                        >
+                            Fusionner les publications
+                        </SvpButton>
+                    </SvpBox>
+
                     {/* Search */}
-                    <SvpBox sx={{ flex: 1, width: '100%', minWidth: isMobile ? '0' : '300px' }}>
+                    <SvpBox sx={{ width: '100%', minWidth: isMobile ? '0' : '300px', flex: isMobile ? 1 : 'none' }}>
                         <SvpBox sx={{ position: 'relative' }}>
                             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: SvpColors.textSecondary }} />
                             <input
                                 type="text"
-                                placeholder={searchType === 'chercheur' ? 'Rechercher un chercheur' : 'Rechercher une structure de recherche'}
+                                placeholder="Rechercher"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 style={{
@@ -289,7 +321,22 @@ export default function PublicationList({
                                 <SvpBox sx={{ gap: isMobile ? 1.5 : 2, flexDirection: isMobile ? 'column' : 'row' }}>
                                     <SvpBox sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                         <SvpBox align="flex-start" sx={{ pt: 0.5 }}>
-                                            <input type="checkbox" style={{ cursor: 'pointer' }} />
+                                            <input
+                                                type="checkbox"
+                                                style={{ cursor: 'pointer', width: '16px', height: '16px', borderRadius: '4px' }}
+                                                checked={selectedPublications.has(pub.title)}
+                                                onChange={() => {
+                                                    setSelectedPublications(prev => {
+                                                        const newSet = new Set(prev);
+                                                        if (newSet.has(pub.title)) {
+                                                            newSet.delete(pub.title);
+                                                        } else {
+                                                            newSet.add(pub.title);
+                                                        }
+                                                        return newSet;
+                                                    });
+                                                }}
+                                            />
                                         </SvpBox>
 
                                         <SvpBox sx={{ flexShrink: 0, position: 'relative' }}>

@@ -145,6 +145,15 @@ export function HalDepositForm({
   const [productionDate, setProductionDate] = useState(initialDate || new Date().toISOString().split('T')[0]);
   const [license, setLicense] = useState('cc-by');
 
+  // Dynamic fields
+  const [journal, setJournal] = useState('');
+  const [conferenceTitle, setConferenceTitle] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [authorityInstitution, setAuthorityInstitution] = useState('');
+  const [director, setDirector] = useState('');
+  const [bookTitle, setBookTitle] = useState('');
+
   // Authors management - simuler des données calculées via AureHAL
   const [authors] = useState<Author[]>(
     initialAuthors ? initialAuthors.split(', ').map((name, idx) => ({
@@ -230,6 +239,49 @@ export function HalDepositForm({
       toast.error('Le type de document est obligatoire');
       return false;
     }
+
+    // Dynamic fields validation
+    if (documentType === 'ART' && !journal.trim()) {
+      toast.error('Le nom de la revue est obligatoire pour un article');
+      return false;
+    }
+    if (['COMM', 'POSTER', 'PRESCONF'].includes(documentType)) {
+      if (!conferenceTitle.trim()) {
+        toast.error('Le titre du congrès est obligatoire');
+        return false;
+      }
+      if (!city.trim()) {
+        toast.error('La ville est obligatoire');
+        return false;
+      }
+      if (!country.trim()) {
+        toast.error('Le pays est obligatoire');
+        return false;
+      }
+    }
+    if (['THESE', 'HDR'].includes(documentType)) {
+      if (!authorityInstitution.trim()) {
+        toast.error('Le nom de l\'établissement de délivrance est obligatoire');
+        return false;
+      }
+      if (!director.trim() && documentType === 'THESE') {
+        toast.error('Le directeur de thèse est obligatoire');
+        return false;
+      }
+      if (!director.trim() && documentType === 'HDR') {
+        toast.error('Le président du jury est obligatoire');
+        return false;
+      }
+    }
+    if (documentType === 'REPORT' && !authorityInstitution.trim()) {
+      toast.error('L\'institution est obligatoire pour un rapport');
+      return false;
+    }
+    if (documentType === 'COUV' && !bookTitle.trim()) {
+      toast.error('Le titre de l\'ouvrage est obligatoire');
+      return false;
+    }
+
     if (domains.length === 0) {
       toast.error('Au moins un domaine HAL est requis');
       return false;
@@ -338,6 +390,47 @@ export function HalDepositForm({
           <Typography sx={{ color: '#2D3836', mb: 2 }}>
             {halDocumentTypes.find(t => t.value === documentType)?.label}
           </Typography>
+
+          {documentType === 'ART' && journal && (
+            <>
+              <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>Nom de la revue</Typography>
+              <Typography sx={{ color: '#2D3836', mb: 2 }}>{journal}</Typography>
+            </>
+          )}
+
+          {['COMM', 'POSTER', 'PRESCONF'].includes(documentType) && conferenceTitle && (
+            <>
+              <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>Titre du congrès</Typography>
+              <Typography sx={{ color: '#2D3836', mb: 2 }}>
+                {conferenceTitle} {city && country ? `(${city}, ${country})` : ''}
+              </Typography>
+            </>
+          )}
+
+          {['THESE', 'HDR', 'REPORT'].includes(documentType) && authorityInstitution && (
+            <>
+              <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                {documentType === 'REPORT' ? "Institution" : "Organisme de délivrance"}
+              </Typography>
+              <Typography sx={{ color: '#2D3836', mb: 2 }}>{authorityInstitution}</Typography>
+            </>
+          )}
+
+          {['THESE', 'HDR'].includes(documentType) && director && (
+            <>
+              <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                {documentType === 'THESE' ? "Directeur de thèse" : "Président du jury"}
+              </Typography>
+              <Typography sx={{ color: '#2D3836', mb: 2 }}>{director}</Typography>
+            </>
+          )}
+
+          {documentType === 'COUV' && bookTitle && (
+            <>
+              <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>Titre de l'ouvrage</Typography>
+              <Typography sx={{ color: '#2D3836', mb: 2 }}>{bookTitle}</Typography>
+            </>
+          )}
 
           <Typography variant="subtitle2" sx={{ color: '#6F7977', mb: 1, fontSize: '0.75rem', textTransform: 'uppercase' }}>
             Auteurs
@@ -582,7 +675,11 @@ export function HalDepositForm({
 
       {/* Date de production */}
       <TextField
-        label="Date de production *"
+        label={
+          ['THESE', 'HDR'].includes(documentType) ? "Date de soutenance *" :
+            ['COMM', 'POSTER', 'PRESCONF'].includes(documentType) ? "Date de début du congrès *" :
+              "Date de publication *"
+        }
         type="date"
         value={productionDate}
         onChange={(e) => setProductionDate(e.target.value)}
@@ -604,6 +701,73 @@ export function HalDepositForm({
           ))}
         </Select>
       </FormControl>
+
+      {/* Dynamic Fields */}
+      {documentType === 'ART' && (
+        <TextField
+          label="Nom de la revue *"
+          value={journal}
+          onChange={(e) => setJournal(e.target.value)}
+          fullWidth
+          sx={{ mb: 3 }}
+        />
+      )}
+
+      {['COMM', 'POSTER', 'PRESCONF'].includes(documentType) && (
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            label="Titre du congrès *"
+            value={conferenceTitle}
+            onChange={(e) => setConferenceTitle(e.target.value)}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              label="Ville *"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Pays *"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              fullWidth
+            />
+          </Box>
+        </Box>
+      )}
+
+      {['THESE', 'HDR', 'REPORT'].includes(documentType) && (
+        <TextField
+          label={documentType === 'REPORT' ? "Institution *" : "Organisme de délivrance *"}
+          value={authorityInstitution}
+          onChange={(e) => setAuthorityInstitution(e.target.value)}
+          fullWidth
+          sx={{ mb: 3 }}
+        />
+      )}
+
+      {['THESE', 'HDR'].includes(documentType) && (
+        <TextField
+          label={documentType === 'THESE' ? "Directeur de thèse *" : "Président du jury *"}
+          value={director}
+          onChange={(e) => setDirector(e.target.value)}
+          fullWidth
+          sx={{ mb: 3 }}
+        />
+      )}
+
+      {documentType === 'COUV' && (
+        <TextField
+          label="Titre de l'ouvrage *"
+          value={bookTitle}
+          onChange={(e) => setBookTitle(e.target.value)}
+          fullWidth
+          sx={{ mb: 3 }}
+        />
+      )}
 
       <Divider sx={{ my: 3 }} />
 
